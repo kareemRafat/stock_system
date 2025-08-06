@@ -13,4 +13,9 @@ class ViewInvoice extends ViewRecord
     protected static ?string $title = 'عرض الفاتورة';
 
     protected static string $view = 'filament.pages.invoices.view-invoice';
+
+    public static function getEloquentQuery()
+    {
+        return parent::getEloquentQuery()->with(['items.product', 'customer']);
+    }
 }
