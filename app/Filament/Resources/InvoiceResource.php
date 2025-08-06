@@ -141,16 +141,11 @@ class InvoiceResource extends Resource
                 ->required()
                 ->preload()
                 ->helperText('اختر العميل من القائمة أو ابدأ بالكتابة للبحث عن عميل موجود'),
-            // Forms\Components\TextInput::make('total_amount')
-            //     ->required()
-            //     ->numeric(),
             Forms\Components\Textarea::make('notes')
                 ->columnSpanFull(),
-            Forms\Components\Checkbox::make('removeFromWallet')
-                ->label('خصم من محفظة العميل')
-                ->default(false)
-                ->dehydrated(fn ($state) => $state !== null) // Always dehydrate (send) the value
-                ->helperText('إذا كان العميل لديه رصيد في المحفظة، سيتم خصم إجمالي الفاتورة من رصيده'),
+            Forms\Components\Hidden::make('created_at')
+                ->default(now()->toDateTimeString()),
+
         ];
     }
 
@@ -174,6 +169,10 @@ class InvoiceResource extends Resource
 
                             $set('price', $price);
                             $set('subtotal', round($price * $quantity, 2));
+
+                            // Recalculate total
+                            $items = $get('../../items') ?? [];
+                            $set('../../total_amount', collect($items)->sum('subtotal'));
                         }),
 
                     Forms\Components\TextInput::make('quantity')
@@ -186,7 +185,12 @@ class InvoiceResource extends Resource
                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                             $price = $get('price') ?? 0;
                             $set('subtotal', round($state * $price, 2));
+
+                            // Recalculate total
+                            $items = $get('../../items') ?? [];
+                            $set('../../total_amount', collect($items)->sum('subtotal'));
                         }),
+
                     Forms\Components\TextInput::make('price')
                         ->label('السعر')
                         ->numeric()
@@ -195,23 +199,50 @@ class InvoiceResource extends Resource
                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                             $quantity = $get('quantity') ?? 1;
                             $set('subtotal', round($state * $quantity, 2));
+
+                            // Recalculate total
+                            $items = $get('../../items') ?? [];
+                            $set('../../total_amount', collect($items)->sum('subtotal'));
                         }),
-                    Forms\Components\Hidden::make('total_amount')
-                        ->dehydrated()
-                        ->default(0),
+
                     Forms\Components\TextInput::make('subtotal')
                         ->label('الإجمالي')
                         ->numeric()
                         ->disabled()
                         ->dehydrated()
-                        ->default(0), // for display only,
+                        ->default(0),
                 ])
                 ->addActionLabel('إضافة صنف')
                 ->columns(4)
                 ->minItems(1)
-                ->required()
+                ->required(),
+            Forms\Components\Group::make()
+                ->schema([
+                    Forms\Components\Placeholder::make('total_amount_display')
+                        ->label(false)
+                        ->content(function ($get) {
+                            $items = $get('items') ?? [];
+                            $total = collect($items)->sum('subtotal');
+                            return view('filament.partials.invoice-total', [
+                                'total' => $total,
+                            ]);
+                        })
+                        ->live(debounce: 300),
+                ]),
+
+            // Optional hidden field for saving to DB
+            Forms\Components\Hidden::make('total_amount')
+                ->dehydrated()
+                ->default(0),
+
+            Forms\Components\Checkbox::make('removeFromWallet')
+                ->label('خصم من محفظة العميل')
+                ->default(false)
+                ->dehydrated(fn($state) => $state !== null) // Always dehydrate (send) the value
+                ->helperText('إذا كان العميل لديه رصيد في المحفظة، سيتم خصم إجمالي الفاتورة من رصيده'),
         ];
     }
+
 
     public static function getRelations(): array
     {
