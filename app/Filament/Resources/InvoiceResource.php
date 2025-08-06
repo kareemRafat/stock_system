@@ -97,6 +97,8 @@ class InvoiceResource extends Resource
                     ->placeholder('كل العملاء'),
             ], layout: FiltersLayout::AboveContent)
             ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->label('عرض الفاتورة'),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -257,6 +259,7 @@ class InvoiceResource extends Resource
             'index' => Pages\ListInvoices::route('/'),
             'create' => Pages\CreateInvoice::route('/create'),
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
+            'view' => Pages\ViewInvoice::route('/{record}'),
         ];
     }
 }
