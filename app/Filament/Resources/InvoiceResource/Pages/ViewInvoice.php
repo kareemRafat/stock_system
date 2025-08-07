@@ -27,17 +27,15 @@ class ViewInvoice extends ViewRecord
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
                 ->url(function () {
-                    // Get the referrer URL
-                    $referrer = request()->header('referer');
-
-                    // Check if coming from customers index with queries
-                    if ($referrer && str_contains($referrer, route('filament.admin.resources.customers.index'))) {
-                        return $referrer; // Preserve full URL with queries
-                    }
-
-                    // return to index with same index queries
-                    return InvoiceResource::getUrl('index', ['_query' => request()->query()]);
+                    return InvoiceResource::getUrl('index');
                 }),
+
+            // Edit Invoice button
+            Actions\Action::make('edit')
+                ->label('تعديل الفاتورة')
+                ->icon('heroicon-o-pencil-square')
+                ->color('primary')
+                ->url(fn() => InvoiceResource::getUrl('edit', ['record' => $this->record->getKey()])),
         ];
     }
 }

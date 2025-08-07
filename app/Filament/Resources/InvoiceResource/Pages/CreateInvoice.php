@@ -3,10 +3,11 @@
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use Filament\Actions;
+use Illuminate\Support\Facades\DB;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\InvoiceResource;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Concerns\HasWizard;
 
 
@@ -53,57 +54,78 @@ class CreateInvoice extends CreateRecord
 
     protected function afterCreate(): void
     {
-        // Update the total amount after creating the invoice
-        $this->record->update([
-            'total_amount' => $this->record->items()->sum('subtotal'),
-        ]);
-
-        // If removeFromWallet is true, deduct from customer's wallet
-        if ($this->data['removeFromWallet']) {
+        DB::transaction(function () {
             $customer = $this->record->customer;
-            $walletBalance = $customer->balance;
-            $totalAmount = $this->record->total_amount;
 
-            if ($customer->balance > 0) {
-                $amountToDeduct = $this->record->total_amount;
-
-                if ($customer->balance >= $amountToDeduct) {
-                    // Deduct from wallet
-                    $customer->wallet()->create([
-                        'type' => 'invoice',
-                        'amount' => $amountToDeduct,
-                        'invoice_id' => $this->record->id,
-                        'invoice_number' => $this->record->invoice_number,
-                    ]);
-                } else {
-                    // Deduct only the available wallet balance and update invoice total
-                    $customer->wallet()->create([
-                        'type' => 'invoice',
-                        'amount' => $walletBalance,
-                        'invoice_id' => $this->record->id,
-                        'invoice_number' => $this->record->invoice_number,
-                    ]);
-
-                    // Update invoice total_amount to the remaining amount
-                    $remainingAmount = $totalAmount - $walletBalance;
-                    $this->record->update([
-                        'total_amount' => $remainingAmount,
-                    ]);
-                }
-            } else {
-                Notification::make()
-                    ->title('لا يوجد رصيد كافي في محفظة العميل')
-                    ->body('لا يمكن خصم إجمالي الفاتورة من محفظة العميل لأنه لا يوجد رصيد كافي.')
-                    ->danger()
-                    ->persistent()
-                    ->duration(5000)
-                    ->send();
+            // 1. If there's remaining amount, add it to customer's wallet
+            if ($this->data['remaining'] > 0) {
+                $customer->wallet()->create([
+                    'type' => 'debit',
+                    'amount' => $this->data['remaining'],
+                    'invoice_id' => $this->record->id,
+                    'invoice_number' => $this->record->invoice_number,
+                ]);
+            } elseif ($this->data['remaining'] < 0) {
+                $customer->wallet()->create([
+                    'type' => 'adjustment',
+                    'amount' => abs($this->data['remaining']),
+                    'invoice_id' => $this->record->id,
+                    'invoice_number' => $this->record->invoice_number,
+                ]);
             }
-        }
+
+            // 2. Update the total amount after creating the invoice
+            $this->record->update([
+                'total_amount' => $this->record->items()->sum('subtotal'),
+            ]);
+
+            // 3. If removeFromWallet is checked, try to deduct from wallet
+            if ($this->data['removeFromWallet']) {
+                $walletBalance = $customer->balance;
+                $totalAmount = $this->record->total_amount;
+
+                if ($walletBalance > 0) {
+                    $amountToDeduct = $totalAmount;
+
+                    if ($walletBalance >= $amountToDeduct) {
+                        // Full deduction
+                        $customer->wallet()->create([
+                            'type' => 'invoice',
+                            'amount' => $amountToDeduct,
+                            'invoice_id' => $this->record->id,
+                            'invoice_number' => $this->record->invoice_number,
+                        ]);
+                    } else {
+                        // Partial deduction
+                        $customer->wallet()->create([
+                            'type' => 'invoice',
+                            'amount' => $walletBalance,
+                            'invoice_id' => $this->record->id,
+                            'invoice_number' => $this->record->invoice_number,
+                        ]);
+
+                        // Update invoice total to reflect what's left to be paid
+                        $remainingAmount = $totalAmount - $walletBalance;
+                        $this->record->update([
+                            'total_amount' => $remainingAmount,
+                        ]);
+                    }
+                } else {
+                    // Notify: insufficient wallet balance
+                    Notification::make()
+                        ->title('لا يوجد رصيد كافي في محفظة العميل')
+                        ->body('لا يمكن خصم إجمالي الفاتورة من محفظة العميل لأنه لا يوجد رصيد كافي.')
+                        ->danger()
+                        ->persistent()
+                        ->duration(5000)
+                        ->send();
+                }
+            }
+        });
     }
 
     protected function getRedirectUrl(): string
     {
-        return static::$resource::getUrl(); // Force redirect to index
+        return static::$resource::getUrl('view', ['record' => $this->record]);
     }
 }

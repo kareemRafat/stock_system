@@ -31,6 +31,15 @@ class EditInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('back')
+                ->label('رجوع')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(function () {
+                    $referrer = request()->header('referer');
+
+                    return $referrer ?? \App\Filament\Resources\InvoiceResource::getUrl('index');
+                }),
             Actions\DeleteAction::make()
                 ->label('حذف الفاتورة')
                 ->color('danger')

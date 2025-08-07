@@ -174,7 +174,9 @@ class InvoiceResource extends Resource
 
                             // Recalculate total
                             $items = $get('../../items') ?? [];
-                            $set('../../total_amount', collect($items)->sum('subtotal'));
+                            $total = collect($items)->sum('subtotal');
+                            $set('../../total_amount', round($total, 2));
+                            static::updateRemaining($set, $get);
                         }),
 
                     Forms\Components\TextInput::make('quantity')
@@ -190,7 +192,9 @@ class InvoiceResource extends Resource
 
                             // Recalculate total
                             $items = $get('../../items') ?? [];
-                            $set('../../total_amount', collect($items)->sum('subtotal'));
+                            $total = collect($items)->sum('subtotal');
+                            $set('../../total_amount', round($total, 2));
+                            static::updateRemaining($set, $get);
                         }),
                     Forms\Components\TextInput::make('price')
                         ->label('السعر')
@@ -203,7 +207,9 @@ class InvoiceResource extends Resource
 
                             // Recalculate total
                             $items = $get('../../items') ?? [];
-                            $set('../../total_amount', collect($items)->sum('subtotal'));
+                            $total = collect($items)->sum('subtotal');
+                            $set('../../total_amount', round($total, 2));
+                            static::updateRemaining($set, $get);
                         }),
 
                     Forms\Components\TextInput::make('subtotal')
@@ -279,5 +285,13 @@ class InvoiceResource extends Resource
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
             'view' => Pages\ViewInvoice::route('/{record}'),
         ];
+    }
+
+    protected static function updateRemaining(callable $set, callable $get): void
+    {
+        $total = $get('../../total_amount') ?? 0;
+        $paid = $get('../../paid') ?? 0;
+
+        $set('../../remaining', round($total - $paid, 2));
     }
 }

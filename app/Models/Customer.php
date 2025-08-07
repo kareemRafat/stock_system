@@ -35,7 +35,7 @@ class Customer extends Model
             ->selectRaw("
                         SUM(
                             CASE
-                                WHEN type = 'deposit' THEN amount
+                                WHEN type = 'debit' THEN -amount
                                 WHEN type = 'invoice' THEN -amount
                                 WHEN type = 'adjustment' THEN amount
                                 ELSE 0

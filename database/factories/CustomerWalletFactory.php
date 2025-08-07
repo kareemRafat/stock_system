@@ -18,7 +18,7 @@ class CustomerWalletFactory extends Factory
      */
     public function definition(): array
     {
-        $type = $this->faker->randomElement(['deposit', 'invoice', 'adjustment']);
+        $type = $this->faker->randomElement(['debit', 'invoice', 'adjustment']);
         $amount = $this->faker->randomFloat(2, 50, 1000);
 
         return [
