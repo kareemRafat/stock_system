@@ -166,7 +166,7 @@ class InvoiceResource extends Resource
                         ->live(debounce: 300)
                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                             $product = \App\Models\Product::find($state);
-                            $price = $product?->price ?? 0;
+                            $price = $product?->final_price ?? 0;
                             $quantity = $get('quantity') ?? 1;
 
                             $set('price', $price);
@@ -192,7 +192,6 @@ class InvoiceResource extends Resource
                             $items = $get('../../items') ?? [];
                             $set('../../total_amount', collect($items)->sum('subtotal'));
                         }),
-
                     Forms\Components\TextInput::make('price')
                         ->label('السعر')
                         ->numeric()
@@ -237,11 +236,30 @@ class InvoiceResource extends Resource
                 ->dehydrated()
                 ->default(0),
 
-            Forms\Components\Checkbox::make('removeFromWallet')
-                ->label('خصم من محفظة العميل')
-                ->default(false)
-                ->dehydrated(fn($state) => $state !== null) // Always dehydrate (send) the value
-                ->helperText('إذا كان العميل لديه رصيد في المحفظة، سيتم خصم إجمالي الفاتورة من رصيده'),
+            Forms\Components\Group::make()
+                ->schema([
+                    Forms\Components\Toggle::make('removeFromWallet')
+                        ->label('خصم من محفظة العميل')
+                        ->default(false)
+                        ->dehydrated(fn($state) => $state !== null)
+                        ->helperText('إذا كان العميل لديه رصيد في المحفظة، سيتم خصم إجمالي الفاتورة من رصيده')
+                        ->columnSpan(2)
+                        ->inline(false),
+                    Forms\Components\TextInput::make('paid')
+                        ->label('المبلغ المدفوع')
+                        ->numeric()
+                        ->default(0)
+                        ->dehydrated()
+                        ->live(debounce: 300)
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            $total = $get('total_amount') ?? 0;
+                            $set('remaining', round($total - $state, 2));
+                        })
+                        ->helperText('فى حالة تبقى مبلغ سيتم اضافته الى محفظة العميل')
+                        ->columnSpan(1),
+                ])
+                ->columns(3),
+            Forms\Components\TextInput::make('remaining'),
         ];
     }
 

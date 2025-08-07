@@ -18,4 +18,15 @@ class Product extends Model
         'stock_quantity',
         'unit',
     ];
+
+    public function getFinalPriceAttribute()
+    {
+        if ($this->discount > 0) {
+            $final = $this->attributes['price'] - ($this->attributes['price'] * $this->discount / 100);
+
+            return number_format($final, 2, '.', '');
+        }
+
+        return number_format($this->attributes['price'], 2, '.', '');
+    }
 }
