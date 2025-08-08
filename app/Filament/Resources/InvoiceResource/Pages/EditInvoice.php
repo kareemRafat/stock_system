@@ -44,8 +44,7 @@ class EditInvoice extends EditRecord
                 ->label('حذف الفاتورة')
                 ->color('danger')
                 ->requiresConfirmation()
-                ->successNotificationTitle('تم حذف الفاتورة بنجاح')
-                ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin'),
+                ->successNotificationTitle('تم حذف الفاتورة بنجاح'),
         ];
     }
 
