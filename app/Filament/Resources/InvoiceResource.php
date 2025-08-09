@@ -94,7 +94,8 @@ class InvoiceResource extends Resource
                         fn() => Customer::query()->pluck('name', 'id')->toArray()
                     )
                     ->searchable()
-                    ->placeholder('كل العملاء'),
+                    ->placeholder('كل العملاء')
+                    ->columnSpan(2),
             ], layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -265,7 +266,7 @@ class InvoiceResource extends Resource
                         ->columnSpan(1),
                 ])
                 ->columns(3),
-            Forms\Components\TextInput::make('remaining'),
+            Forms\Components\Hidden::make('remaining'),
         ];
     }
 
