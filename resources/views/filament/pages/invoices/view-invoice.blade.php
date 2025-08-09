@@ -27,9 +27,6 @@
 
         </div>
 
-
-
-
         <div id="print-area" class="bg-white p-6 rounded-lg shadow-sm ring-1 ring-gray-200">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row justify-between items-start mb-6">
@@ -63,8 +60,11 @@
                         </div>
 
                     </div>
-                    <p class="opacity-0">dd</p>
-                    <p>01030231321</p>
+                    <div class="flex px-4 mt-4 pt-4 pb-2 mb-2 text-sm font-medium justify-end gap-4">
+                        <p>01030231321</p>
+                        <span> - </span>
+                        <p>01030231321</p>
+                    </div>
                 </div>
 
             </div>
