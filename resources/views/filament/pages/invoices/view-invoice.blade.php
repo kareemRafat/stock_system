@@ -115,7 +115,7 @@
                             @endphp
                             @foreach ($record->items as $item)
                                 @php
-                                    $totalBeforeSale += $item->product->price;
+                                    $totalBeforeSale += $item->product->price * $item->quantity;
                                     $discounts +=
                                         $item->product->discount > 0
                                             ? ($item->product->price * $item->quantity * $item->product->discount) / 100
