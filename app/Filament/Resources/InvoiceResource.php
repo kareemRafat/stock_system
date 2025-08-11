@@ -10,12 +10,10 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Wizard;
+use Filament\Navigation\NavigationItem;
 use Filament\Tables\Enums\FiltersLayout;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\InvoiceResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\InvoiceResource\RelationManagers;
 
 class InvoiceResource extends Resource
 {
@@ -67,7 +65,6 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('إجمالي الفاتورة')
                     ->suffix(' جنيه ')
-                    ->sortable()
                     ->weight('semibold'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الفاتورة')
@@ -294,5 +291,26 @@ class InvoiceResource extends Resource
         $paid = $get('../../paid') ?? 0;
 
         $set('../../remaining', round($total - $paid, 2));
+    }
+
+    public static function getNavigationItems(): array
+    {
+        return array_merge(
+            parent::getNavigationItems(),
+            [
+
+                NavigationItem::make()
+                    ->label('اضافة فاتورة جديدة')
+                    ->icon('heroicon-o-plus-circle')
+                    ->activeIcon('heroicon-s-plus-circle')
+                    ->isActiveWhen(fn() => request()->path() === 'invoices/create')
+                    ->group('الطلبيات والفواتير')
+                    ->sort(2)
+                    ->url(static::getUrl('create')),
+                NavigationItem::make('Invoices')
+                    ->url(route('filament.admin.resources.invoices.index'))
+                    ->isActiveWhen(fn() => request()->path() === 'invoices'),
+            ]
+        );
     }
 }

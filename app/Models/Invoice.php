@@ -63,4 +63,9 @@ class Invoice extends Model
         // Fallback to a timestamp if all attempts fail
         return $prefix . now()->format('ymdHis');
     }
+
+    public function getTotalAmountAttribute($value)
+    {
+        return number_format($value, 2, '.', '');
+    }
 }

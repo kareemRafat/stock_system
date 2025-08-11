@@ -45,7 +45,7 @@
                         <!-- Invoice Number -->
                         <div class="flex items-center flex-col">
                             <span class="mb-2">رقم الفاتورة :</span>
-                            <span> #{{ $record->invoice_number }}</span>
+                            <span> # {{ $record->invoice_number }}</span>
                         </div>
 
                         <!-- Vertical Separator -->
@@ -171,7 +171,10 @@
                         <hr class="border-gray-200">
                         <div class="flex justify-between py-3 px-4 rounded-md">
                             <span class="text-base font-medium">الإجمالي بعد الخصم:</span>
-                            <span class="text-base font-medium">{{ number_format($record->total_amount, 2) }} ج.م
+                            <span class="text-base font-medium">
+                                {{ number_format(
+                                    $record->total_amount == 0 ? $totalBeforeSale - $discounts : $record->total_amount
+                                , 2) }} ج.م
                             </span>
                         </div>
                     </div>
