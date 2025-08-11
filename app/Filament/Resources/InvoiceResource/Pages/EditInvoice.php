@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use Filament\Actions;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Forms\Components\Wizard\Step;
 use App\Filament\Resources\InvoiceResource;
@@ -35,11 +36,7 @@ class EditInvoice extends EditRecord
                 ->label('رجوع')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
-                ->url(function () {
-                    $referrer = request()->header('referer');
-
-                    return $referrer ?? \App\Filament\Resources\InvoiceResource::getUrl('index');
-                }),
+                ->url(fn () => Session::get('previous_url') ?? InvoiceResource::getUrl('index')),
             Actions\DeleteAction::make()
                 ->label('حذف الفاتورة')
                 ->color('danger')
@@ -51,5 +48,13 @@ class EditInvoice extends EditRecord
     protected function getRedirectUrl(): string
     {
         return static::$resource::getUrl(); // Force redirect to index
+    }
+
+    public function mount($record): void
+    {
+        parent::mount($record);
+
+        // Save the previous URL to the session
+        Session::flash('previous_url', url()->previous());
     }
 }

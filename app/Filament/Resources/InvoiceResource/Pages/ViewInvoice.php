@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
-use App\Filament\Resources\InvoiceResource;
 use Filament\Actions;
+use Illuminate\Support\Facades\Session;
 use Filament\Resources\Pages\ViewRecord;
+use App\Filament\Resources\InvoiceResource;
 
 class ViewInvoice extends ViewRecord
 {
@@ -39,4 +40,5 @@ class ViewInvoice extends ViewRecord
                 ->url(fn() => InvoiceResource::getUrl('edit', ['record' => $this->record->getKey()])),
         ];
     }
+
 }

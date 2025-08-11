@@ -106,23 +106,23 @@ class ViewCustomer extends ViewRecord
         parent::mount($record);
 
         // Save the previous URL to the session
-        Session::put('previous_url', url()->previous());
+        Session::flash('previous_url', url()->previous());
     }
 
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('back')
+                ->label('رجوع')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(fn() => Session::get('previous_url') ?? CustomerResource::getUrl('index')),
             Actions\DeleteAction::make()
                 ->label('حذف')
                 ->icon('heroicon-o-trash')
                 ->color('danger')
                 ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin')
                 ->extraAttributes(['class' => 'font-semibold']),
-            Actions\Action::make('back')
-                ->label('رجوع')
-                ->icon('heroicon-o-arrow-left')
-                ->color('gray')
-                ->url(fn () => Session::get('previous_url') ?? CustomerResource::getUrl('index')),
         ];
     }
 }
