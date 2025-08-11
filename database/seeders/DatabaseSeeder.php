@@ -10,6 +10,7 @@ use App\Models\Customer;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\InvoiceItem;
 use App\Models\CustomerWallet;
+use App\Models\OutsourcedProduction;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -41,5 +42,7 @@ class DatabaseSeeder extends Seeder
         Invoice::factory(20)->create();
         InvoiceItem::factory(20)->create();
         CustomerWallet::factory(20)->create();
+
+        OutsourcedProduction::factory(20)->create();
     }
 }

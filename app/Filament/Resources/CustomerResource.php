@@ -7,19 +7,14 @@ use Filament\Tables;
 use App\Models\Customer;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Illuminate\Validation\Rule;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Actions\ActionGroup;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\CustomerResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Actions\CustomerActions\AdjustBalanceAction;
-use App\Filament\Resources\CustomerResource\RelationManagers;
-use App\Filament\Actions\CustomerActions\ViewCustomerDetailsAction;
+
 
 class CustomerResource extends Resource
 {
