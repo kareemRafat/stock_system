@@ -51,6 +51,7 @@ class OutsourcedProductionResource extends Resource
 
                 Forms\Components\TextInput::make('size')
                     ->label('المقاس')
+                    ->required()
                     ->maxLength(100),
 
                 Forms\Components\TextInput::make('total_cost')
@@ -120,7 +121,8 @@ class OutsourcedProductionResource extends Resource
                 Tables\Columns\TextColumn::make('total_cost')
                     ->label('التكلفة')
                     ->weight(FontWeight::Medium)
-                    ->numeric(),
+                    ->numeric()
+                    ->suffix(' ج.م '),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('تاريخ البدء')
                     ->weight(FontWeight::Medium)

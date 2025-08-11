@@ -4,7 +4,9 @@ namespace App\Filament\Resources\CustomerResource\Pages;
 
 use Filament\Actions;
 use Filament\Infolists\Infolist;
+use Illuminate\Support\Facades\Auth;
 use Filament\Infolists\Components\Grid;
+use Illuminate\Support\Facades\Session;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use App\Filament\Resources\CustomerResource;
@@ -99,25 +101,28 @@ class ViewCustomer extends ViewRecord
             ]);
     }
 
+    public function mount($record): void
+    {
+        parent::mount($record);
+
+        // Save the previous URL to the session
+        Session::put('previous_url', url()->previous());
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            Actions\DeleteAction::make()
+                ->label('حذف')
+                ->icon('heroicon-o-trash')
+                ->color('danger')
+                ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin')
+                ->extraAttributes(['class' => 'font-semibold']),
             Actions\Action::make('back')
                 ->label('رجوع')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
-                ->url(function () {
-                    // Get the referrer URL
-                    $referrer = request()->header('referer');
-
-                    // Check if coming from customers index with queries
-                    if ($referrer && str_contains($referrer, route('filament.admin.resources.customers.index'))) {
-                        return $referrer; // Preserve full URL with queries
-                    }
-
-                    // return to index with same index queries
-                    return CustomerResource::getUrl('index', ['_query' => request()->query()]);
-                }),
+                ->url(fn () => Session::get('previous_url') ?? CustomerResource::getUrl('index')),
         ];
     }
 }

@@ -118,7 +118,6 @@ class CustomerResource extends Resource
                 //
             ])
             ->actions([
-                // ViewCustomerDetailsAction::make(),
                 Tables\Actions\ViewAction::make()
                     ->color('primary')
                     ->icon('heroicon-o-eye')
@@ -128,9 +127,6 @@ class CustomerResource extends Resource
                 ActionGroup::make([
                     AdjustBalanceAction::make(),
                     Tables\Actions\EditAction::make()
-                        ->extraAttributes(['class' => 'font-semibold']),
-                    Tables\Actions\DeleteAction::make()
-                        ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin')
                         ->extraAttributes(['class' => 'font-semibold']),
                 ])
                     ->label('المزيد')
