@@ -38,9 +38,23 @@ class PayInvoiceAction
                     ->helperText('إذا كان العميل لديه رصيد في المحفظة، سيتم خصم إجمالي الفاتورة من رصيده')
                     ->columnSpan(2)
                     ->inline(false),
+                Forms\Components\Placeholder::make('wallet_balance')
+                    ->label('رصيد المحفظة الحالي')
+                    ->content(function ($record) {
+                        if (! $record?->customer) {
+                            return '— لا يوجد عميل —';
+                        }
+
+                        $balance = $record->customer->balance ?? 0;
+                        return number_format($balance, 2) . ' ج.م';
+                    })
+                    ->extraAttributes(function ($record) {
+                        $balance = $record?->customer?->balance ?? 0;
+                        $color = $balance > 0 ? '#16a34a' : ($balance < 0 ? '#dc2626' : '#1f2937'); // green/red/gray
+                        return ['style' => "color: {$color}; font-weight: 700;"];
+                    }),
             ])
             ->action(function (array $data, Model $record) {
-
                 DB::transaction(function () use ($data, $record) {
                     // 2 - remove from wallet
                     if ($data['removeFromWallet']) {
