@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('customer_wallets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-            $table->enum('type', ['debit', 'invoice', 'adjustment']);
+            $table->enum('type', ['debit', 'invoice', 'credit']);
             // adjastment: تعديل رصيد العميل بشكل يدوي
             $table->decimal('amount', 10, 2);
             $table->foreignId('invoice_id')->nullable()->constrained()->onDelete('set null');

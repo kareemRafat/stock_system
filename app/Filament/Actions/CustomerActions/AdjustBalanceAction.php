@@ -30,7 +30,7 @@ class AdjustBalanceAction
                 // Create the wallet transaction
                 CustomerWallet::create([
                     'customer_id' => $record->id,
-                    'type' => 'adjustment',
+                    'type' => 'credit',
                     'amount' => $data['amount'],
                     'created_at' => now()->format('Y-m-d H:i:s'),
                 ]);

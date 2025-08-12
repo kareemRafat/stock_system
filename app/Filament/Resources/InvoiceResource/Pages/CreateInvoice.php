@@ -54,32 +54,19 @@ class CreateInvoice extends CreateRecord
 
     protected function afterCreate(): void
     {
+
+        $this->record->update([
+            'total_amount' => $this->record->items()->sum('subtotal'),
+        ]);
+
         DB::transaction(function () {
             $customer = $this->record->customer;
 
-            // 1. If there's remaining amount, add it to customer's wallet
-            if ($this->data['remaining'] > 0) {
-                $customer->wallet()->create([
-                    'type' => 'debit',
-                    'amount' => $this->data['remaining'],
-                    'invoice_id' => $this->record->id,
-                    'invoice_number' => $this->record->invoice_number,
-                ]);
-            } elseif ($this->data['remaining'] < 0) {
-                $customer->wallet()->create([
-                    'type' => 'adjustment',
-                    'amount' => abs($this->data['remaining']),
-                    'invoice_id' => $this->record->id,
-                    'invoice_number' => $this->record->invoice_number,
-                ]);
-            }
-
             // 2. Update the total amount after creating the invoice
-            $this->record->update([
-                'total_amount' => $this->record->items()->sum('subtotal'),
-            ]);
+
 
             // 3. If removeFromWallet is checked, try to deduct from wallet
+            /*
             if ($this->data['removeFromWallet']) {
                 $walletBalance = $customer->balance;
                 $totalAmount = $this->record->total_amount;
@@ -121,6 +108,7 @@ class CreateInvoice extends CreateRecord
                         ->send();
                 }
             }
+            */
         });
     }
 

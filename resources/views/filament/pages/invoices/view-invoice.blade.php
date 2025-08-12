@@ -116,12 +116,12 @@
                         <tbody>
                             @php
                                 $totalBeforeSale = 0;
-                                $discounts = 0;
+                                $totalDiscounts = 0;
                             @endphp
                             @foreach ($record->items as $item)
                                 @php
                                     $totalBeforeSale += $item->product->price * $item->quantity;
-                                    $discounts +=
+                                    $totalDiscounts +=
                                         $item->product->discount > 0
                                             ? ($item->product->price * $item->quantity * $item->product->discount) / 100
                                             : 0;
@@ -166,14 +166,14 @@
                         </div>
                         <div class="flex justify-between py-2 px-2">
                             <span class="text-sm">الخصومات:</span>
-                            <span class="font-medium text-sm">{{ number_format($discounts, 2) }}</span>
+                            <span class="font-medium text-sm">{{ number_format($totalDiscounts, 2) }}</span>
                         </div>
                         <hr class="border-gray-200">
                         <div class="flex justify-between py-3 px-4 rounded-md">
                             <span class="text-base font-medium">الإجمالي بعد الخصم:</span>
                             <span class="text-base font-medium">
                                 {{ number_format(
-                                    $record->total_amount == 0 ? $totalBeforeSale - $discounts : $record->total_amount
+                                    $record->total_amount == 0 ? $totalBeforeSale - $totalDiscounts : $record->total_amount
                                 , 2) }} ج.م
                             </span>
                         </div>

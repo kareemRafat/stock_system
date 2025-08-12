@@ -37,7 +37,7 @@ class Customer extends Model
                             CASE
                                 WHEN type = 'debit' THEN -amount
                                 WHEN type = 'invoice' THEN -amount
-                                WHEN type = 'adjustment' THEN amount
+                                WHEN type = 'credit' THEN amount
                                 ELSE 0
                             END
                         ) as balance

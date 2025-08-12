@@ -15,6 +15,7 @@ class Invoice extends Model
         'customer_id',
         'total_amount',
         'notes',
+        'status',
     ];
 
     public function customer()

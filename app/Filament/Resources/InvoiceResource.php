@@ -14,6 +14,7 @@ use Filament\Navigation\NavigationItem;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\InvoiceResource\Pages;
+use App\Filament\Actions\InvoiceActions\PayInvoiceAction;
 
 class InvoiceResource extends Resource
 {
@@ -57,7 +58,8 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('invoice_number')
                     ->label('رقم الفاتورة')
                     ->weight('semibold')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => strtoupper($state)),
                 Tables\Columns\TextColumn::make('customer.name')
                     ->label('اسم العميل')
                     ->weight('semibold')
@@ -83,6 +85,21 @@ class InvoiceResource extends Resource
                         return $record->updated_at ? null : 'danger';
                     })
                     ->weight('semibold'),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('الحالة')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'pending'   => 'orange',   // orange
+                        'paid'      => 'success',   // green
+                        'cancelled' => 'danger',    // red
+                        default     => 'secondary', // gray
+                    })
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                        'pending'   => 'قيد الانتظار',
+                        'paid'      => 'مدفوعة',
+                        'cancelled' => 'ملغاة',
+                        default     => $state,
+                    })
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('customer_id')
@@ -98,6 +115,7 @@ class InvoiceResource extends Resource
                 Tables\Actions\ViewAction::make()
                     ->label('عرض الفاتورة'),
                 Tables\Actions\EditAction::make(),
+                PayInvoiceAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -174,7 +192,6 @@ class InvoiceResource extends Resource
                             $items = $get('../../items') ?? [];
                             $total = collect($items)->sum('subtotal');
                             $set('../../total_amount', round($total, 2));
-                            static::updateRemaining($set, $get);
                         }),
 
                     Forms\Components\TextInput::make('quantity')
@@ -192,7 +209,6 @@ class InvoiceResource extends Resource
                             $items = $get('../../items') ?? [];
                             $total = collect($items)->sum('subtotal');
                             $set('../../total_amount', round($total, 2));
-                            static::updateRemaining($set, $get);
                         }),
                     Forms\Components\TextInput::make('price')
                         ->label('السعر')
@@ -207,7 +223,6 @@ class InvoiceResource extends Resource
                             $items = $get('../../items') ?? [];
                             $total = collect($items)->sum('subtotal');
                             $set('../../total_amount', round($total, 2));
-                            static::updateRemaining($set, $get);
                         }),
 
                     Forms\Components\TextInput::make('subtotal')
@@ -239,31 +254,6 @@ class InvoiceResource extends Resource
             Forms\Components\Hidden::make('total_amount')
                 ->dehydrated()
                 ->default(0),
-
-            Forms\Components\Group::make()
-                ->schema([
-                    Forms\Components\Toggle::make('removeFromWallet')
-                        ->label('خصم من محفظة العميل')
-                        ->default(false)
-                        ->dehydrated(fn($state) => $state !== null)
-                        ->helperText('إذا كان العميل لديه رصيد في المحفظة، سيتم خصم إجمالي الفاتورة من رصيده')
-                        ->columnSpan(2)
-                        ->inline(false),
-                    Forms\Components\TextInput::make('paid')
-                        ->label('المبلغ المدفوع')
-                        ->numeric()
-                        ->default(0)
-                        ->dehydrated()
-                        ->live(debounce: 300)
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            $total = $get('total_amount') ?? 0;
-                            $set('remaining', round($total - $state, 2));
-                        })
-                        ->helperText('فى حالة تبقى مبلغ سيتم اضافته الى محفظة العميل')
-                        ->columnSpan(1),
-                ])
-                ->columns(3),
-            Forms\Components\Hidden::make('remaining'),
         ];
     }
 
@@ -285,20 +275,11 @@ class InvoiceResource extends Resource
         ];
     }
 
-    protected static function updateRemaining(callable $set, callable $get): void
-    {
-        $total = $get('../../total_amount') ?? 0;
-        $paid = $get('../../paid') ?? 0;
-
-        $set('../../remaining', round($total - $paid, 2));
-    }
-
     public static function getNavigationItems(): array
     {
         return array_merge(
             parent::getNavigationItems(),
             [
-
                 NavigationItem::make()
                     ->label('اضافة فاتورة جديدة')
                     ->icon('heroicon-o-plus-circle')
@@ -307,9 +288,6 @@ class InvoiceResource extends Resource
                     ->group('الطلبيات والفواتير')
                     ->sort(2)
                     ->url(static::getUrl('create')),
-                NavigationItem::make('Invoices')
-                    ->url(route('filament.admin.resources.invoices.index'))
-                    ->isActiveWhen(fn() => request()->path() === 'invoices'),
             ]
         );
     }
