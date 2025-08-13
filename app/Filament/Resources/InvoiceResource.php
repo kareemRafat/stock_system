@@ -102,6 +102,19 @@ class InvoiceResource extends Resource
                     })
             ])
             ->filters([
+                Tables\Filters\Filter::make('paid_status')
+                    ->form([
+                        Forms\Components\Toggle::make('pending_only')
+                            ->label('عرض الفواتير غير المدفوعة')
+                            ->default(false)
+                            ->inline(false),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if ($data['pending_only']) {
+                            $query->where('status', 'pending');
+                        }
+                    })
+                    ->columnSpanFull(),
                 Tables\Filters\SelectFilter::make('customer_id')
                     ->label('اسم العميل')
                     ->options(
