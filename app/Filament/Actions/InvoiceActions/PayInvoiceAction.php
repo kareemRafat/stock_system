@@ -35,9 +35,10 @@ class PayInvoiceAction
                     ->label('خصم من محفظة العميل')
                     ->default(false)
                     ->dehydrated(fn($state) => $state !== null)
-                    ->helperText('إذا كان العميل لديه رصيد في المحفظة، سيتم خصم إجمالي الفاتورة من رصيده')
+                    ->helperText('خصم من رصيد العميل وفي حالة وجود باقي يتم اضافته الى المديونية ')
                     ->columnSpan(2)
-                    ->inline(false),
+                    ->inline(false)
+                    ->disabled(fn($record) => $record->customer->balance <= 0),
                 Forms\Components\Placeholder::make('wallet_balance')
                     ->label('رصيد المحفظة الحالي')
                     ->content(function ($record) {
@@ -55,81 +56,56 @@ class PayInvoiceAction
                     }),
             ])
             ->action(function (array $data, Model $record) {
+                if ($data['paid'] <= 0 && (empty($data['removeFromWallet']) || !$data['removeFromWallet'])) {
+                    Notification::make()
+                        ->title('حدث خطأ فى تسديد الفاتورة لعدم ادخال المبلغ المدفوع او عدم اختيار السداد من الرصيد')
+                        ->warning()
+                        ->send();
+                    return; // or return null;
+                }
+
                 DB::transaction(function () use ($data, $record) {
-                    // 2 - remove from wallet
-                    if ($data['removeFromWallet']) {
-                        $walletBalance = $record->customer->balance;
-                        $totalAmount   = $record->total_amount;
-                        $paidFromForm  = (float) $data['paid'];
-                        $totalPaid     = 0; // track combined payments
-
-                        if ($walletBalance > 0) {
-                            if ($walletBalance >= $totalAmount) {
-                                // Wallet covers entire invoice
-                                $record->customer->wallet()->create([
-                                    'type'           => 'invoice',
-                                    'amount'         => $totalAmount,
-                                    'invoice_id'     => $record->id,
-                                    'invoice_number' => $record->invoice_number,
-                                ]);
-
-                                $totalPaid = $totalAmount;
-                            } else {
-                                // Wallet covers part → deduct wallet first
-                                $record->customer->wallet()->create([
-                                    'type'           => 'invoice',
-                                    'amount'         => $walletBalance,
-                                    'invoice_id'     => $record->id,
-                                    'invoice_number' => $record->invoice_number,
-                                ]);
-
-                                // The rest comes from form payment
-                                $remainingAmount = $totalAmount - $walletBalance;
-                                $totalPaid       = $walletBalance + $paidFromForm;
-
-                                // If there's still some unpaid after wallet + paidFromForm,
-                                // update invoice total to remaining unpaid
-                                // if ($totalPaid < $totalAmount) {
-                                //     $record->update([
-                                //         'total_amount' => $totalAmount - $totalPaid,
-                                //     ]);
-                                // }
-                            }
-                        } else {
-                            // No wallet balance → just use form payment
-                            $totalPaid = $paidFromForm;
-
-                            // if ($totalPaid < $totalAmount) {
-                            //     $this->record->update([
-                            //         'total_amount' => $totalAmount - $totalPaid,
-                            //     ]);
-                            // } elseif ($totalPaid >= $totalAmount) {
-                            //     // Paid in full directly
-                            //     $this->record->update([
-                            //         'total_amount' => 0,
-                            //         'status'       => 'paid',
-                            //     ]);
-                            // }
-                        }
-
-                        // If full invoice is covered, mark as paid
-                        // if ($totalPaid >= $totalAmount) {
-                        //     $record->update(['status' => 'paid']);
-                        // }
+                    // التحقق من وجود طريقة دفع
+                    if ($data['paid'] <= 0 && (empty($data['removeFromWallet']) || !$data['removeFromWallet'])) {
+                        Notification::make()
+                            ->title('يجب إدخال مبلغ أو استخدام الرصيد')
+                            ->warning()
+                            ->send();
+                        return;
                     }
-                    // 2 - add to wallet if there is big or less payment
+
+                    $walletAmountUsed = 0;
+
+                    // 1 - استخدام رصيد المحفظة إذا طُلب ذلك
+                    if (isset($data['removeFromWallet']) && $data['removeFromWallet']) {
+                        $availableBalance = $record->customer->balance;
+                        $remainingAmount = $record->total_amount - $data['paid'];
+                        $walletAmountUsed = min($availableBalance, max(0, $remainingAmount));
+
+                        // خصم من المحفظة إذا كان هناك مبلغ للاستخدام
+                        if ($walletAmountUsed > 0) {
+                            $record->customer->wallet()->create([
+                                'type' => 'debit',
+                                'amount' => $walletAmountUsed,
+                                'invoice_id' => $record->id,
+                                'invoice_number' => $record->invoice_number,
+                            ]);
+                        }
+                    }
+
+                    // 2 - حساب الفرق بناءً على المدفوع فقط (بدون المحفظة)
                     $difference = $data['paid'] - $record->total_amount;
 
                     if ($difference > 0) {
-                        // Overpayment → add to balance
+                        // دفع زائد → إضافة للرصيد
                         $record->customer->wallet()->create([
                             'type' => 'credit',
                             'amount' => $difference,
                             'invoice_id' => $record->id,
                             'invoice_number' => $record->invoice_number,
                         ]);
-                    } elseif ($difference < 0) {
-                        // Underpayment → subtract from balance
+                    } elseif ($difference < 0 && (!isset($data['removeFromWallet']) || !$data['removeFromWallet'])) {
+                        // نقص في الدفع → خصم من الرصيد (فقط عند عدم استخدام المحفظة)
                         $record->customer->wallet()->create([
                             'type' => 'debit',
                             'amount' => abs($difference),
@@ -138,10 +114,8 @@ class PayInvoiceAction
                         ]);
                     }
 
-
-
-                    // 3 - add paid to invoice status
-                    Invoice::find($record->id)->update([
+                    // 3 - تحديث حالة الفاتورة
+                    $record->update([
                         'status' => 'paid'
                     ]);
 
