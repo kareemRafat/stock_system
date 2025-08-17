@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->foreignId('invoice_id')->nullable()->constrained()->onDelete('set null');
             $table->string('invoice_number')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

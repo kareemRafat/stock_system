@@ -24,7 +24,10 @@ class AdjustBalanceAction
                     ->label('المبلغ')
                     ->numeric()
                     ->required()
-                    ->rules(['required', 'numeric', 'min:0.01'])
+                    ->rules(['required', 'numeric', 'min:0.01']),
+                Forms\Components\Textarea::make('notes')
+                    ->label('ملاحظات الإضافة')
+                    ->columnSpanFull(),
             ])
             ->action(function (array $data, Model $record) {
                 // Create the wallet transaction
@@ -32,6 +35,7 @@ class AdjustBalanceAction
                     'customer_id' => $record->id,
                     'type' => 'credit',
                     'amount' => $data['amount'],
+                    'notes' => $data['notes'],
                     'created_at' => now()->format('Y-m-d H:i:s'),
                 ]);
 
