@@ -41,10 +41,16 @@ class ProductResource extends Resource
                     ->rules('required')
                     ->required()
                     ->placeholder('كرتونة - قطعة - كيلو إلخ'),
+                Forms\Components\TextInput::make('production_price')
+                    ->required()
+                    ->rules('required')
+                    ->label('سعر المصنع')
+                    ->numeric()
+                    ->suffix('جنيه'),
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->rules('required')
-                    ->label('السعر')
+                    ->label('سعر البيع')
                     ->numeric()
                     ->suffix('جنيه'),
                 Forms\Components\TextInput::make('discount')
@@ -87,6 +93,11 @@ class ProductResource extends Resource
                     ->formatStateUsing(fn($state) => $state == 0 ? 'لاتوجد' : $state)
                     ->color(fn($state) => $state == 0 ? 'danger' : ($state < 20 ? 'orange' : null))
                     ->weight(FontWeight::Bold),
+                Tables\Columns\TextColumn::make('production_price')
+                    ->label('سعر المصنع')
+                    ->suffix(' جنيه ')
+                    ->weight(FontWeight::Medium)
+                    ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin'),
                 Tables\Columns\TextColumn::make('price')
                     ->label('السعر')
                     ->suffix(' جنيه ')
