@@ -59,57 +59,6 @@ class CreateInvoice extends CreateRecord
             'total_amount' => $this->record->items()->sum('subtotal'),
         ]);
 
-        DB::transaction(function () {
-            $customer = $this->record->customer;
-
-            // 2. Update the total amount after creating the invoice
-
-
-            // 3. If removeFromWallet is checked, try to deduct from wallet
-            /*
-            if ($this->data['removeFromWallet']) {
-                $walletBalance = $customer->balance;
-                $totalAmount = $this->record->total_amount;
-
-                if ($walletBalance > 0) {
-                    $amountToDeduct = $totalAmount;
-
-                    if ($walletBalance >= $amountToDeduct) {
-                        // Full deduction
-                        $customer->wallet()->create([
-                            'type' => 'invoice',
-                            'amount' => $amountToDeduct,
-                            'invoice_id' => $this->record->id,
-                            'invoice_number' => $this->record->invoice_number,
-                        ]);
-                    } else {
-                        // Partial deduction
-                        $customer->wallet()->create([
-                            'type' => 'invoice',
-                            'amount' => $walletBalance,
-                            'invoice_id' => $this->record->id,
-                            'invoice_number' => $this->record->invoice_number,
-                        ]);
-
-                        // Update invoice total to reflect what's left to be paid
-                        $remainingAmount = $totalAmount - $walletBalance;
-                        $this->record->update([
-                            'total_amount' => $remainingAmount,
-                        ]);
-                    }
-                } else {
-                    // Notify: insufficient wallet balance
-                    Notification::make()
-                        ->title('لا يوجد رصيد كافي في محفظة العميل')
-                        ->body('لا يمكن خصم إجمالي الفاتورة من محفظة العميل لأنه لا يوجد رصيد كافي.')
-                        ->danger()
-                        ->persistent()
-                        ->duration(5000)
-                        ->send();
-                }
-            }
-            */
-        });
     }
 
     protected function getRedirectUrl(): string

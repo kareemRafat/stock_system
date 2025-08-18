@@ -65,6 +65,9 @@ class ViewCustomer extends ViewRecord
                                         $state < 0 ? 'rose' : ($state > 0 ? 'success' : 'gray')
                                     )
                                     ->weight('bold')
+                                    ->url(fn($record) => route('filament.admin.resources.customers.wallet', $record))
+                                    ->openUrlInNewTab(true)
+                                    ->extraAttributes(['class' => 'cursor-pointer hover:underline']),
                             ]),
                     ])
                     ->collapsible(),

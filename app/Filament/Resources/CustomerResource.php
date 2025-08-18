@@ -126,6 +126,12 @@ class CustomerResource extends Resource
                     ->label('عرض التفاصيل'),
                 ActionGroup::make([
                     AdjustBalanceAction::make(),
+                    Tables\Actions\Action::make('wallet')
+                        ->label('حركة الرصيد')
+                        ->color('teal')
+                        ->extraAttributes(['class' => 'font-semibold'])
+                        ->url(fn($record) => route('filament.admin.resources.customers.wallet', $record))
+                        ->icon('heroicon-o-wallet'),
                     Tables\Actions\EditAction::make()
                         ->extraAttributes(['class' => 'font-semibold']),
                 ])
@@ -155,6 +161,7 @@ class CustomerResource extends Resource
         return [
             'index' => Pages\ListCustomers::route('/'),
             'view' => Pages\ViewCustomer::route('/{record}'),
+            'wallet' => Pages\CustomerWalletPage::route('/{record}/wallet'),
             // 'create' => Pages\CreateCustomer::route('/create'),
             // 'edit' => Pages\EditCustomer::route('/{record}/edit'),
         ];

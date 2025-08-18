@@ -4,7 +4,7 @@
 
 namespace App\Filament\Actions\CustomerActions;
 
-use Filament\Tables\Actions\Action;
+use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\TextEntry;
@@ -66,8 +66,7 @@ class ViewCustomerDetailsAction
                                 ->placeholder('لايوجد')
                                 ->icon('heroicon-o-banknotes')
                                 ->formatStateUsing(
-                                    fn($state) =>
-                                    $state == 0
+                                    fn($state) => $state == 0
                                         ? '0 ج.م'
                                         : number_format($state, 2) . ' ج.م'
                                 )
@@ -76,6 +75,7 @@ class ViewCustomerDetailsAction
                                     $state < 0 ? 'rose' : ($state > 0 ? 'success' : 'gray')
                                 )
                                 ->weight('bold')
+                                ->extraAttributes(['class' => 'cursor-pointer hover:underline']),
                         ]),
                 ])
                 ->collapsible(),
