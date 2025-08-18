@@ -36,7 +36,8 @@ class CustomerWalletPage extends Page implements Tables\Contracts\HasTable
                             + $rowLoop->iteration
                     )
                     ->sortable(false)
-                    ->searchable(false),
+                    ->searchable(false)
+                    ->weight('semibold'),
                 Tables\Columns\TextColumn::make('type')
                     ->label('نوع الحركة')
                     ->badge()
@@ -50,11 +51,24 @@ class CustomerWalletPage extends Page implements Tables\Contracts\HasTable
                         'debit' => 'سحب',
                         'invoice' => 'فاتورة',
                         default => $state,
-                    }),
-                Tables\Columns\TextColumn::make('amount')->money('egp'),
-                Tables\Columns\TextColumn::make('invoice.number')->label('Invoice'),
-                Tables\Columns\TextColumn::make('notes')->limit(40),
-                Tables\Columns\TextColumn::make('created_at')->date('d-m-y'),
+                    })
+                    ->weight('semibold'),
+                Tables\Columns\TextColumn::make('amount')
+                    ->label('الكمية')
+                    ->money('egp')
+                    ->weight('semibold'),
+                Tables\Columns\TextColumn::make('invoice.invoice_number')
+                    ->label('سحب بالفاتورة')
+                    ->default('لايوجد')
+                    ->weight('semibold'),
+                Tables\Columns\TextColumn::make('notes')
+                    ->label('ملاحظات الحركة')
+                    ->limit(40)
+                    ->weight('semibold'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('تاريخ الإضافة')
+                    ->date('d-m-y')
+                    ->weight('semibold'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
