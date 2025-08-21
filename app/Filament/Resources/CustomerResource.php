@@ -74,6 +74,15 @@ class CustomerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                Customer::query()
+                    ->withSum(['wallet as debit_sum' => function ($query) {
+                        $query->whereIn('type', ['debit', 'invoice']);
+                    }], 'amount')
+                    ->withSum(['wallet as credit_sum' => function ($query) {
+                        $query->where('type', 'credit');
+                    }], 'amount')
+            )
             ->recordUrl(null) // This disables row clicking
             ->recordAction(null) // prevent clickable row
             ->striped()
@@ -93,6 +102,8 @@ class CustomerResource extends Resource
                     ->weight(FontWeight::Medium),
                 Tables\Columns\TextColumn::make('balance')
                     ->label('رصيد العميل')
+                    ->getStateUsing(fn($record) => ($record->credit_sum - $record->debit_sum) ?? 0)
+
                     ->formatStateUsing(
                         fn($state) =>
                         $state == 0

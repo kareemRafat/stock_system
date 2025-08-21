@@ -1,4 +1,6 @@
 <x-filament-panels::page>
+    {{-- {{ dd($this->record->items->first()->relationLoaded('product')) }} --}}
+
     <div class="py-4">
         <!-- Print Buttons Section -->
         <div class="flex justify-end mb-4 no-print gap-4 ">
@@ -45,7 +47,7 @@
                         <!-- Invoice Number -->
                         <div class="flex items-center flex-col">
                             <span class="mb-2">رقم الفاتورة :</span>
-                            <span> # {{ $record->invoice_number }}</span>
+                            <span> # {{ $this->record->invoice_number }}</span>
                         </div>
 
                         <!-- Vertical Separator -->
@@ -56,7 +58,7 @@
                         <!-- Date -->
                         <div class="flex items-center flex-col">
                             <span class="mr-1 mb-2">التاريخ:</span>
-                            <span>{{ $record->created_at->format('d-m-Y') }}</span>
+                            <span>{{ $this->record->created_at->format('d-m-Y') }}</span>
                         </div>
 
                     </div>
@@ -82,8 +84,8 @@
                 <h3 class="text-base font-medium text-gray-700 my-4">طبعت الفاتورة لأمر :</h3>
                 <div
                     class="bg-gray-50 p-4 rounded-md border border-gray-200 my-4 flex flex-col sm:flex-row justify-between">
-                    <p class="font-medium text-gray-700">{{ $record->customer->name ?? '-' }}</p>
-                    <p class="text-gray-700 text-sm">{{ $record->customer->address ?? '---' }}</p>
+                    <p class="font-medium text-gray-700">{{ $this->record->customer->name ?? '-' }}</p>
+                    <p class="text-gray-700 text-sm">{{ $this->record->customer->address ?? '---' }}</p>
                 </div>
             </div>
 
@@ -118,7 +120,7 @@
                                 $totalBeforeSale = 0;
                                 $totalDiscounts = 0;
                             @endphp
-                            @foreach ($record->items as $item)
+                            @foreach ($this->record->items as $item)
                                 @php
                                     $totalBeforeSale += $item->product->price * $item->quantity;
                                     $totalDiscounts +=
@@ -173,7 +175,7 @@
                             <span class="text-base font-medium">الإجمالي بعد الخصم:</span>
                             <span class="text-base font-medium">
                                 {{ number_format(
-                                    $record->total_amount == 0 ? $totalBeforeSale - $totalDiscounts : $record->total_amount
+                                    $this->record->total_amount == 0 ? $totalBeforeSale - $totalDiscounts : $this->record->total_amount
                                 , 2) }} ج.م
                             </span>
                         </div>

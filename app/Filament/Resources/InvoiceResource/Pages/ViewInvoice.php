@@ -16,9 +16,14 @@ class ViewInvoice extends ViewRecord
     protected static string $view = 'filament.pages.invoices.view-invoice';
 
 
-    public static function getEloquentQuery()
+    // public static function getEloquentQuery()
+    // {
+    //     return parent::getEloquentQuery()->with(['items.product', 'customer']);
+    // }
+
+    public function getRecord(): \App\Models\Invoice
     {
-        return parent::getEloquentQuery()->with(['items.product', 'customer']);
+        return parent::getRecord()->loadMissing(['items.product', 'customer']);
     }
 
     protected function getHeaderActions(): array
@@ -40,5 +45,4 @@ class ViewInvoice extends ViewRecord
                 ->url(fn() => InvoiceResource::getUrl('edit', ['record' => $this->record->getKey()])),
         ];
     }
-
 }
