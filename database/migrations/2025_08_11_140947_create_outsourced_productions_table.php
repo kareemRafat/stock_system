@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('total_cost', 10, 2)->nullable(); // التكلفة الكلية
             $table->date('start_date')->nullable(); // تاريخ بدء التصنيع
             $table->date('actual_delivery_date')->nullable(); // تاريخ التسليم الفعلي
-            $table->enum('status', ['in_progress', 'completed', 'canceled'])->default('pending'); // حالة الطلب
+            $table->enum('status', ['in_progress', 'completed', 'canceled'])->default('in_progress'); // حالة الطلب
             $table->text('notes')->nullable(); // ملاحظات إضافية
             $table->timestamps();
         });
