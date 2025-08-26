@@ -1,15 +1,11 @@
 <?php
 
-// Enhanced version: app/Filament/Actions/ViewCustomerDetailsAction.php
-
 namespace App\Filament\Actions\CustomerActions;
 
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\Actions;
-use Filament\Infolists\Components\Actions\Action as InfolistAction;
 
 class ViewCustomerDetailsAction
 {

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Actions\ProductActions\AddStockAction;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Product;
@@ -140,6 +141,7 @@ class ProductResource extends Resource
                 //
             ])
             ->actions([
+                AddStockAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin'),
