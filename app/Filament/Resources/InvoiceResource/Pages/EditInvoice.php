@@ -36,7 +36,7 @@ class EditInvoice extends EditRecord
                 ->label('رجوع')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
-                ->url(fn () => Session::get('previous_url') ?? InvoiceResource::getUrl('index')),
+                ->url(fn() => Session::get('previous_url') ?? InvoiceResource::getUrl('index')),
             Actions\DeleteAction::make()
                 ->label('حذف الفاتورة')
                 ->color('danger')
@@ -56,5 +56,38 @@ class EditInvoice extends EditRecord
 
         // Save the previous URL to the session
         Session::flash('previous_url', url()->previous());
+    }
+
+    /**
+     * After save hook for updating stock.
+     */
+    protected function afterSave(): void
+    {
+        $this->updateStockQuantities();
+    }
+
+    /**
+     * Handle stock recalculation when editing invoice
+     */
+    private function updateStockQuantities(): void
+    {
+        // Recalculate total
+        $this->record->update([
+            'total_amount' => $this->record->items()->sum('subtotal'),
+        ]);
+
+        // Reset stock from old invoice quantities
+        foreach ($this->record->items()->getOriginal() as $item) {
+            if ($item->product) {
+                $item->product->increment('stock_quantity', $item->getOriginal('quantity') ?? 0);
+            }
+        }
+
+        // Apply new stock decrements
+        foreach ($this->record->items as $item) {
+            if ($item->product) {
+                $item->product->decrement('stock_quantity', $item->quantity);
+            }
+        }
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Customer;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Wizard;
 use Filament\Navigation\NavigationItem;
 use Filament\Tables\Enums\FiltersLayout;
@@ -127,12 +128,13 @@ class InvoiceResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('عرض الفاتورة'),
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
                 PayInvoiceAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    // Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin'),
                 ]),
             ]);
     }
@@ -313,7 +315,7 @@ class InvoiceResource extends Resource
         return [
             'index' => Pages\ListInvoices::route('/'),
             'create' => Pages\CreateInvoice::route('/create'),
-            'edit' => Pages\EditInvoice::route('/{record}/edit'),
+            // 'edit' => Pages\EditInvoice::route('/{record}/edit'),
             'view' => Pages\ViewInvoice::route('/{record}'),
         ];
     }
