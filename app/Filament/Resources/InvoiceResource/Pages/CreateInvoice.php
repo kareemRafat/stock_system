@@ -52,6 +52,7 @@ class CreateInvoice extends CreateRecord
         ];
     }
 
+
     protected function afterCreate(): void
     {
 
@@ -59,6 +60,12 @@ class CreateInvoice extends CreateRecord
             'total_amount' => $this->record->items()->sum('subtotal'),
         ]);
 
+        // Decrease stock for each product in items
+        foreach ($this->record->items as $item) {
+            if ($item->product) {
+                $item->product->decrement('stock_quantity', $item->quantity);
+            }
+        }
     }
 
     protected function getRedirectUrl(): string

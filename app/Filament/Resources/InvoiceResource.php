@@ -189,22 +189,41 @@ class InvoiceResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('product_id')
                         ->label('الصنف')
-                        ->relationship('product', 'name')
+                        ->relationship(
+                            name: 'product',
+                            titleAttribute: 'name',
+                            modifyQueryUsing: fn(\Illuminate\Database\Eloquent\Builder $query) =>
+                            $query->where('stock_quantity', '>', 0) // only products with stock
+                        )
                         ->required()
                         ->native(false)
                         ->live(debounce: 300)
                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            $product = \App\Models\Product::find($state);
-                            $price = $product?->final_price ?? 0;
+                            $product  = \App\Models\Product::find($state);
+                            $price    = $product?->final_price ?? 0;
+                            $stock    = $product?->stock_quantity ?? 0;
                             $quantity = $get('quantity') ?? 1;
 
                             $set('price', $price);
+                            $set('stock_quantity', $stock);
                             $set('subtotal', round($price * $quantity, 2));
 
                             // Recalculate total
                             $items = $get('../../items') ?? [];
                             $total = collect($items)->sum('subtotal');
                             $set('../../total_amount', round($total, 2));
+                        }),
+
+                    Forms\Components\TextInput::make('stock_quantity')
+                        ->label('المتاح بالمخزن')
+                        ->disabled()
+                        ->dehydrated(false)
+                        ->afterStateHydrated(function ($set, $get) {
+                            $productId = $get('product_id');
+                            if ($productId) {
+                                $stock = \App\Models\Product::find($productId)?->stock_quantity ?? 0;
+                                $set('stock_quantity', $stock);
+                            }
                         }),
 
                     Forms\Components\TextInput::make('quantity')
@@ -214,6 +233,14 @@ class InvoiceResource extends Resource
                         ->default(1)
                         ->required()
                         ->live(debounce: 300)
+                        ->rule(function (callable $get) {
+                            return function (string $attribute, $value, \Closure $fail) use ($get) {
+                                $stock = $get('stock_quantity') ?? 0;
+                                if ($value > $stock) {
+                                    $fail("الكمية المطلوبة ($value) أكبر من المتاح في المخزن");
+                                }
+                            };
+                        })
                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                             $price = $get('price') ?? 0;
                             $set('subtotal', round($state * $price, 2));
@@ -223,6 +250,7 @@ class InvoiceResource extends Resource
                             $total = collect($items)->sum('subtotal');
                             $set('../../total_amount', round($total, 2));
                         }),
+
                     Forms\Components\TextInput::make('price')
                         ->label('السعر')
                         ->numeric()
@@ -246,9 +274,10 @@ class InvoiceResource extends Resource
                         ->default(0),
                 ])
                 ->addActionLabel('إضافة صنف')
-                ->columns(4)
+                ->columns(5) // was 4, now 5 because we added stock_quantity
                 ->minItems(1)
                 ->required(),
+
             Forms\Components\Group::make()
                 ->schema([
                     Forms\Components\Placeholder::make('total_amount_display')
@@ -263,12 +292,13 @@ class InvoiceResource extends Resource
                         ->live(debounce: 300),
                 ]),
 
-            // Optional hidden field for saving to DB
+            // Hidden field for saving total to DB
             Forms\Components\Hidden::make('total_amount')
                 ->dehydrated()
                 ->default(0),
         ];
     }
+
 
 
     public static function getRelations(): array
