@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->enum('type', ['جملة', 'قطاعي'])->default('جملة');
             $table->decimal('production_price', 10, 2)->comment('سعر المصنع');
             $table->decimal('price', 10, 2)->comment('سعر البيع');
             $table->unsignedTinyInteger('discount')->default(0);

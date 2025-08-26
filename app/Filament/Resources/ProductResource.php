@@ -36,6 +36,19 @@ class ProductResource extends Resource
                     ->rules('required')
                     ->label('اسم المنتج')
                     ->columnSpanFull(),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\Radio::make('type')
+                            ->label('') // نخلي اللابل فاضي
+                            ->options([
+                                'جملة' => 'جملة',
+                                'قطاعي' => 'قطاعي',
+                            ])
+                            ->default('جملة')
+                            ->required()
+                            ->inline(true),
+                    ])
+                    ->heading('نوع البيع'),
                 Forms\Components\TextInput::make('unit')
                     ->label('وحدة القياس')
                     ->rules('required')
@@ -84,6 +97,15 @@ class ProductResource extends Resource
                     ->color('purple')
                     ->label('الاسم')
                     ->weight(FontWeight::Medium),
+                Tables\Columns\TextColumn::make('type')
+                    ->label('نوع البيع')
+                    ->formatStateUsing(fn(string $state): string => $state) // يعرض القيمة نفسها
+                    ->weight(FontWeight::Medium)
+                    ->color(fn(string $state): string => match ($state) {
+                        'جملة' => 'success',
+                        'قطاعي' => 'rose',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('unit')
                     ->label('الوحدة')
                     ->weight(FontWeight::Medium),

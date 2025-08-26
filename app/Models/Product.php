@@ -17,6 +17,8 @@ class Product extends Model
         'discount',
         'stock_quantity',
         'unit',
+        'production_price',
+        'type'
     ];
 
     public function getFinalPriceAttribute()
