@@ -12,6 +12,7 @@ class OutsourcedProduction extends Model
 
     protected $fillable = [
         'product_name',
+        'factory_name',
         'quantity',
         'size',
         'total_cost',
