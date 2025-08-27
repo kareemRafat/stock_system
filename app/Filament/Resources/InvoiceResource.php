@@ -193,10 +193,11 @@ class InvoiceResource extends Resource
                         ->label('الصنف')
                         ->relationship(
                             name: 'product',
-                            titleAttribute: 'name',
                             modifyQueryUsing: fn(\Illuminate\Database\Eloquent\Builder $query) =>
                             $query->where('stock_quantity', '>', 0) // only products with stock
                         )
+                        // to concatinate type with name
+                        ->getOptionLabelFromRecordUsing(fn($record) => "{$record->name} - {$record->type}")
                         ->required()
                         ->native(false)
                         ->live(debounce: 300)
