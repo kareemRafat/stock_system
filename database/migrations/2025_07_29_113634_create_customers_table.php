@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->text('city')->nullable();
             $table->text('governorate')->nullable();
+            $table->enum('status', ['enabled', 'disabled'])->default('enabled');
             $table->timestamps();
         });
     }

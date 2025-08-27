@@ -15,6 +15,9 @@ class Customer extends Model
         'phone',
         'phone2',
         'address',
+        'city',
+        'governorate',
+        'status'
     ];
 
     public function invoices()

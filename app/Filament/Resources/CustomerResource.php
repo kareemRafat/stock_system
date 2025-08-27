@@ -38,12 +38,27 @@ class CustomerResource extends Resource
                     ->label('إسم العميل')
                     ->unique(ignoreRecord: true)
                     ->rules(['required', 'string', 'max:255'])
+                    ->required(),
+                Forms\Components\ToggleButtons::make('status')
+                    ->label('الحالة')
+                    ->options([
+                        'enabled' => 'مفعل',
+                        'disabled' => 'معطل',
+                    ])
+                    ->colors([
+                        'enabled' => 'success',
+                        'disabled' => 'danger',
+                    ])
+                    ->icons([
+                        'enabled' => 'heroicon-o-check-circle',
+                        'disabled' => 'heroicon-o-x-circle',
+                    ])
+                    ->inline()
                     ->required()
-                    ->columnSpanFull(),
+                    ->default('enabled'),
                 Forms\Components\TextInput::make('phone')
                     ->tel()
                     ->label('رقم التواصل')
-                    ->unique(ignoreRecord: true)
                     ->rules(['required', 'string', 'regex:/^([0-9\s\-\+\(\)]*)$/', 'min:10'])
                     ->required()
                     ->helperText("رقم التواصل مطلوب لعملية تسجيل العميل"),
@@ -51,7 +66,6 @@ class CustomerResource extends Resource
                     ->tel()
                     ->rules(['nullable', 'string', 'regex:/^([0-9\s\-\+\(\)]*)$/', 'min:10'])
                     ->label('رقم احتياطي')
-                    ->unique(ignoreRecord: true)
                     ->helperText("يمكن ترك الحقل فارغاً"),
                 Forms\Components\Textarea::make('address')
                     ->label('العنوان')
@@ -61,11 +75,9 @@ class CustomerResource extends Resource
                 Forms\Components\TextInput::make('city')
                     ->label('المدينة')
                     ->rules(['required', 'string', 'max:255'])
-                    ->required()
-                    ->unique(ignoreRecord: true),
+                    ->required(),
                 Forms\Components\TextInput::make('governorate')
                     ->label('المحافظة')
-                    ->unique(ignoreRecord: true)
                     ->required()
                     ->rules(['required', 'string', 'max:255']),
             ]);
@@ -124,6 +136,18 @@ class CustomerResource extends Resource
                     ->date("d-m-Y")
                     ->sortable()
                     ->weight(FontWeight::Medium),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('الحالة')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'enabled' => 'success', // Yellow badge for enabled
+                        'disabled' => 'warning', // Green badge for disabled
+
+                    })
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                        'enabled' => 'مفعل',
+                        'disabled' => 'معطل',
+                    })
             ])
             ->filters([
                 //

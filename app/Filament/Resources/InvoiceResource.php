@@ -27,6 +27,8 @@ class InvoiceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'الفواتير'; // Plural
 
+    protected static ?string $navigationLabel = 'فواتير العملاء';
+
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
 
     protected static ?string $activeNavigationIcon = 'heroicon-s-calculator';
@@ -154,6 +156,7 @@ class InvoiceResource extends Resource
                 ->label('اسم العميل')
                 ->options(
                     fn() => Customer::query()
+                        ->where('status', 'enabled')
                         ->latest()
                         ->limit(10)
                         ->pluck('name', 'id')
