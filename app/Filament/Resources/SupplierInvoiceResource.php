@@ -29,11 +29,6 @@ class SupplierInvoiceResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('invoice_number')
-                    ->label('رقم الفاتورة')
-                    ->required()
-                    ->maxLength(50),
-
                 Forms\Components\Select::make('supplier_id')
                     ->label('المورد')
                     ->relationship('supplier', 'name')
@@ -52,7 +47,10 @@ class SupplierInvoiceResource extends Resource
                             ->pluck('name', 'id')
                     )
                     ->required(),
-
+                Forms\Components\TextInput::make('invoice_number')
+                    ->label('رقم الفاتورة')
+                    ->required()
+                    ->maxLength(50),
                 Forms\Components\TextInput::make('total_amount')
                     ->label('إجمالي الفاتورة')
                     ->numeric()
@@ -70,13 +68,9 @@ class SupplierInvoiceResource extends Resource
                     ->columnSpanFull()
                     ->relationship('items') // SupplierInvoice hasMany SupplierInvoiceItem
                     ->schema([
-                        // Forms\Components\TextInput::make('product_name')
-                        //     ->label('اسم المنتج')
-                        //     ->required(),
-
                         Forms\Components\Select::make('product_id') // Use the foreign key for the relationship
                             ->label('اسم المنتج')
-                            ->relationship(name: 'product', titleAttribute: 'name') // Adjust 'name' to your column name
+                            ->relationship(name: 'product', titleAttribute: 'name')
                             ->required()
                             ->searchable() // Optional: Enable search for easier product selection
                             ->preload(), // Optional: Load options immediately
@@ -91,15 +85,20 @@ class SupplierInvoiceResource extends Resource
                             ->numeric()
                             ->required(),
 
+                        Forms\Components\TextInput::make('sell_price')
+                            ->label('سعر البيع')
+                            ->numeric()
+                            ->required(),
+
                         Forms\Components\TextInput::make('subtotal')
                             ->label('الإجمالي')
                             ->numeric()
                             ->dehydrated(true) // يتخزن في الداتابيز
                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                $set('total', $get('quantity') * $get('unit_price'));
+                                $set('total', $get('quantity') * $get('price'));
                             }),
                     ])
-                    ->columns(4)
+                    ->columns(5)
                     ->addActionLabel('إضافة صنف جديد')
                     ->defaultItems(1),
             ]);

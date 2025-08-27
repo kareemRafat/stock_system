@@ -1,6 +1,7 @@
 <x-filament-panels::page>
     {{-- {{ dd($this->record->items->first()->relationLoaded('product')) }} --}}
-
+    @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
     <div class="py-4">
         <!-- Print Buttons Section -->
         <div class="flex justify-end mb-4 no-print gap-4 ">
@@ -59,6 +60,7 @@
                         <div class="flex items-center flex-col">
                             <span class="mr-1 mb-2">التاريخ:</span>
                             <span>{{ $this->record->created_at->format('d-m-Y') }}</span>
+                            <span>{{ $this->record->created_at->format('h:m') }}</span>
                         </div>
 
                     </div>
@@ -77,13 +79,13 @@
             </div>
 
             <!-- Separator -->
-            <hr class="my-6 border-gray-200">
+            <hr class="my-6 border-gray-900">
 
             <!-- Bill To Section -->
             <div class="mb-6">
                 <h3 class="text-base font-medium text-gray-700 my-4">طبعت الفاتورة لأمر :</h3>
                 <div
-                    class="bg-gray-50 p-4 rounded-md border border-gray-200 my-4 flex flex-col sm:flex-row justify-between">
+                    class="bg-gray-50 p-4 rounded-md border border-gray-900 my-4 flex flex-col sm:flex-row justify-between">
                     <p class="font-medium text-gray-700">{{ $this->record->customer->name ?? '-' }}</p>
                     <p class="text-gray-700 text-sm">{{ $this->record->customer->address ?? '---' }}</p>
                 </div>
@@ -96,22 +98,22 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th
-                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-300">
+                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-900">
                                     مسلسل</th>
                                 <th
-                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-300">
+                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-900">
                                     المنتج</th>
                                 <th
-                                    class="text-center py-2 px-4 font-medium text-gray-700 text-sm border border-gray-300">
+                                    class="text-center py-2 px-4 font-medium text-gray-700 text-sm border border-gray-900">
                                     الكمية</th>
                                 <th
-                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-300">
+                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-900">
                                     الخصم</th>
                                 <th
-                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-300">
+                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-900">
                                     السعر </th>
                                 <th
-                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-300">
+                                    class="text-right py-2 px-4 font-medium text-gray-700 text-sm border border-gray-900">
                                     الإجمالي</th>
                             </tr>
                         </thead>
@@ -128,24 +130,24 @@
                                             ? ($item->product->price * $item->quantity * $item->product->discount) / 100
                                             : 0;
                                 @endphp
-                                <tr class="border-t border-gray-200">
-                                    <td class="py-2 px-4 text-right text-gray-500 text-sm border border-gray-300">
+                                <tr class="border-t border-gray-900">
+                                    <td class="py-2 px-4 text-right text-gray-500 text-sm border border-gray-900">
                                         {{ $loop->iteration }}
                                     </td>
-                                    <td class="py-2 px-4 text-gray-700 text-sm border border-gray-300">
+                                    <td class="py-2 px-4 text-gray-700 text-sm border border-gray-900">
                                         {{ $item->product->name ?? '---' }}
                                     </td>
-                                    <td class="py-2 px-4 text-center text-gray-500 text-sm border border-gray-300">
+                                    <td class="py-2 px-4 text-center text-gray-500 text-sm border border-gray-900">
                                         {{ $item->quantity }} {{ $item->product->unit ?? '---' }}
                                     </td>
-                                    <td class="py-2 px-4 text-right text-gray-500 text-sm border border-gray-300">
+                                    <td class="py-2 px-4 text-right text-gray-500 text-sm border border-gray-900">
                                         {{ $item->product->discount > 0 ? $item->product->discount . ' %' : '---' }}
                                     </td>
-                                    <td class="py-2 px-4 text-right text-gray-500 text-sm border border-gray-300">
+                                    <td class="py-2 px-4 text-right text-gray-500 text-sm border border-gray-900">
                                         {{ number_format($item->product->price, 2) }}
                                     </td>
                                     <td
-                                        class="py-2 px-4 text-right font-medium text-gray-700 text-sm border border-gray-300">
+                                        class="py-2 px-4 text-right font-medium text-gray-700 text-sm border border-gray-900">
                                         {{ number_format($item->subtotal, 2) }}
                                     </td>
                                 </tr>
@@ -170,7 +172,7 @@
                             <span class="text-sm">الخصومات:</span>
                             <span class="font-medium text-sm">{{ number_format($totalDiscounts, 2) }}</span>
                         </div>
-                        <hr class="border-gray-200">
+                        <hr class="border-gray-900">
                         <div class="flex justify-between py-3 px-4 rounded-md">
                             <span class="text-base font-medium">الإجمالي بعد الخصم:</span>
                             <span class="text-base font-medium">

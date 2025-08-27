@@ -16,7 +16,7 @@
                 <!-- Invoice Number -->
                 <div class="flex items-center flex-col">
                     <span class="mb-2">رقم الفاتورة :</span>
-                    <span> #{{ $record->invoice_number }}</span>
+                    <span> # {{ $record->invoice_number }}</span>
                 </div>
 
                 <!-- Vertical Separator -->
@@ -27,6 +27,7 @@
                 <div class="flex items-center flex-col">
                     <span class="mr-1 mb-2">التاريخ:</span>
                     <span>{{ $record->created_at->format('d-m-Y') }}</span>
+                    <span>{{ $this->record->created_at->format('h:m') }}</span>
                 </div>
 
             </div>
