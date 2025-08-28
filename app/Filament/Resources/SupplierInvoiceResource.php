@@ -94,11 +94,24 @@ class SupplierInvoiceResource extends Resource
                             ->label('الإجمالي')
                             ->numeric()
                             ->required()
-                            ->dehydrated(true), // يتخزن في الداتابيز
+                            ->dehydrated(true) // يتخزن في الداتابيز
+                            ->live(debounce: 500),
                     ])
                     ->columns(5)
                     ->addActionLabel('إضافة صنف جديد')
                     ->defaultItems(1),
+                Forms\Components\Placeholder::make('total_placeholder')
+                    ->label('الإجمالي الكلي')
+                    ->content(
+                        fn($get) =>
+                        collect($get('items') ?? [])
+                            ->sum(fn($item) => (int) ($item['subtotal'] ?? 0)) . ' جنيه'
+                    )
+                    ->extraAttributes([
+                        'class' => 'bg-primary-600 text-white border rounded-lg shadow-sm p-3 filament-forms-input'
+                    ])
+                    ->columnSpanFull(),
+
             ]);
     }
 

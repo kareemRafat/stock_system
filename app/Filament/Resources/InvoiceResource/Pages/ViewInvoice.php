@@ -36,13 +36,6 @@ class ViewInvoice extends ViewRecord
                 ->url(function () {
                     return InvoiceResource::getUrl('index');
                 }),
-
-            // Edit Invoice button
-            // Actions\Action::make('edit')
-            //     ->label('تعديل الفاتورة')
-            //     ->icon('heroicon-o-pencil-square')
-            //     ->color('primary')
-            //     ->url(fn() => InvoiceResource::getUrl('edit', ['record' => $this->record->getKey()])),
         ];
     }
 }

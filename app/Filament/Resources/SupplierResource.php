@@ -41,17 +41,13 @@ class SupplierResource extends Resource
                 Forms\Components\TextInput::make('phone')
                     ->label('رقم الهاتف')
                     ->tel()
+                    ->required()
                     ->maxLength(20),
 
-                Forms\Components\Textarea::make('address')
+                Forms\Components\TextInput::make('address')
                     ->label('العنوان')
-                    ->rows(3)
                     ->nullable(),
 
-                Forms\Components\Textarea::make('notes')
-                    ->label('ملاحظات')
-                    ->rows(3)
-                    ->nullable(),
             ]);
     }
 
@@ -99,6 +95,7 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('address')
                     ->label('العنوان')
                     ->limit(30)
+                    ->default('لايوجد')
                     ->weight(FontWeight::Medium),
 
                 Tables\Columns\TextColumn::make('created_at')
@@ -115,7 +112,8 @@ class SupplierResource extends Resource
                     ->color('teal')
                     ->extraAttributes(['class' => 'font-semibold'])
                     ->url(fn($record) => route('filament.admin.resources.suppliers.wallet', $record))
-                    ->icon('heroicon-o-wallet'),
+                    ->icon('heroicon-o-wallet')
+                    ->disabled(fn ($record) => $record->balance == 0),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

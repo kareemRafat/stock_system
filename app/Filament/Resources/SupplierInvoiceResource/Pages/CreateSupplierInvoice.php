@@ -43,4 +43,13 @@ class CreateSupplierInvoice extends CreateRecord
             // if no "previous", fallback to index
         ];
     }
+
+    // to remove add and add more
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction(), // زر إضافة فقط
+            $this->getCancelFormAction(), // زر إلغاء يرجع للـ index
+        ];
+    }
 }

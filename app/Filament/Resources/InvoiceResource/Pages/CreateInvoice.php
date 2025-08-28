@@ -10,7 +10,6 @@ use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\InvoiceResource;
 use Filament\Resources\Pages\Concerns\HasWizard;
 
-
 class CreateInvoice extends CreateRecord
 {
     use HasWizard;
