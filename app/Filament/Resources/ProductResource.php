@@ -167,6 +167,7 @@ class ProductResource extends Resource
     {
         return [
             'index' => Pages\ListProducts::route('/'),
+            'add-products' => Pages\AddProducts::route('/add-products'),
             // 'create' => Pages\CreateProduct::route('/create'),
             // 'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
