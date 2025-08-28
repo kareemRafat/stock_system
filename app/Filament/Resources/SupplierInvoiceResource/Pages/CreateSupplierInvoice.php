@@ -32,4 +32,15 @@ class CreateSupplierInvoice extends CreateRecord
         }
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('back')
+                ->label('رجوع')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(url()->previous() ?? SupplierInvoiceResource::getUrl('index')),
+            // if no "previous", fallback to index
+        ];
+    }
 }

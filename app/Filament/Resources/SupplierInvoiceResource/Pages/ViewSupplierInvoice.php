@@ -67,4 +67,22 @@ class ViewSupplierInvoice extends ViewRecord
                     ->collapsible(),
             ]);
     }
+
+    /**
+     * Add header actions.
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            \Filament\Actions\CreateAction::make()
+                ->label('إضافة فاتورة جديدة')
+                ->icon('heroicon-o-plus-circle')
+                ->url(route('filament.admin.resources.supplier-invoices.create')), // adjust panel if needed
+            \Filament\Actions\Action::make('back')
+                ->label('رجوع')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(SupplierInvoiceResource::getUrl('index')),
+        ];
+    }
 }

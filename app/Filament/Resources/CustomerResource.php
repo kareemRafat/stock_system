@@ -87,6 +87,7 @@ class CustomerResource extends Resource
     {
         return $table
             ->query(
+                // eager loading
                 Customer::query()
                     ->withSum(['wallet as debit_sum' => function ($query) {
                         $query->whereIn('type', ['debit', 'invoice']);
@@ -115,7 +116,6 @@ class CustomerResource extends Resource
                 Tables\Columns\TextColumn::make('balance')
                     ->label('رصيد العميل')
                     ->getStateUsing(fn($record) => ($record->credit_sum - $record->debit_sum) ?? 0)
-
                     ->formatStateUsing(
                         fn($state) =>
                         $state == 0

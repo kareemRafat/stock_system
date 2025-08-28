@@ -58,6 +58,16 @@ class SupplierResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                // eager loading
+                Supplier::query()
+                    ->withSum(['wallet as debit_sum' => function ($query) {
+                        $query->whereIn('type', ['debit', 'invoice']);
+                    }], 'amount')
+                    ->withSum(['wallet as credit_sum' => function ($query) {
+                        $query->where('type', 'credit');
+                    }], 'amount')
+            )
             ->recordUrl(null) // This disables row clicking
             ->recordAction(null) // prevent clickable row
             ->defaultSort('created_at', 'desc')
@@ -72,6 +82,20 @@ class SupplierResource extends Resource
                     ->label('رقم الهاتف')
                     ->weight(FontWeight::Medium),
 
+                Tables\Columns\TextColumn::make('balance')
+                    ->label('رصيد المورد')
+                    ->getStateUsing(fn($record) => ($record->credit_sum - $record->debit_sum) ?? 0)
+                    ->formatStateUsing(
+                        fn($state) =>
+                        $state == 0
+                            ? '0 ج.م'
+                            : number_format($state, 2) . ' ج.م'
+                    )
+                    ->color(
+                        fn($state) =>
+                        $state < 0 ? 'rose' : ($state > 0 ? 'success' : 'gray')
+                    )
+                    ->weight(FontWeight::Medium),
                 Tables\Columns\TextColumn::make('address')
                     ->label('العنوان')
                     ->limit(30)
