@@ -26,6 +26,7 @@ class ViewSupplierInvoice extends ViewRecord
                             ->weight('semibold'),
                         TextEntry::make('supplier.name')
                             ->label('اسم المورد')
+                            ->color('rose')
                             ->weight('semibold'),
                         TextEntry::make('total_amount')
                             ->label('إجمالي الفاتورة')
@@ -34,6 +35,7 @@ class ViewSupplierInvoice extends ViewRecord
                         TextEntry::make('invoice_date')
                             ->label('تاريخ الفاتورة')
                             ->date('d/m/Y')
+                            ->color('purple')
                             ->weight('semibold'),
                     ])
                     ->columns(2)
@@ -45,6 +47,7 @@ class ViewSupplierInvoice extends ViewRecord
                             ->schema([
                                 TextEntry::make('product.name')
                                     ->label('اسم المنتج')
+                                    ->color('indigo')
                                     ->weight('semibold'),
                                 TextEntry::make('quantity')
                                     ->label('الكمية')
