@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     {{-- {{ dd($this->record->items->first()->relationLoaded('product')) }} --}}
-    @vite('resources/css/app.css')
-    @vite('resources/js/app.js')
+    {{-- @vite('resources/css/app.css') --}}
+    {{-- @vite('resources/js/app.js') --}}
     <div class="py-4">
         <!-- Print Buttons Section -->
         <div class="flex justify-end mb-4 no-print gap-4 ">

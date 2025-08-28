@@ -15,6 +15,7 @@ class CustomerWalletPage extends Page implements Tables\Contracts\HasTable
     use Tables\Concerns\InteractsWithTable;
 
     protected static string $resource = CustomerResource::class;
+
     protected static string $view = 'filament.pages.customers.customer-wallet-page';
 
     public Customer $customer;
@@ -28,6 +29,7 @@ class CustomerWalletPage extends Page implements Tables\Contracts\HasTable
     {
         return $table
             ->query($this->customer->wallet()->getQuery())
+            ->emptyStateHeading('لا توجد حركات رصيد للعملاء')
             ->columns([
                 Tables\Columns\TextColumn::make('index')
                     ->label('#')
@@ -67,15 +69,15 @@ class CustomerWalletPage extends Page implements Tables\Contracts\HasTable
                     ->weight('semibold'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإضافة')
-                    ->date('d-m-y')
+                    ->date('d-m-Y')
                     ->weight('semibold'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
                     ->options([
-                        'credit' => 'Credit',
-                        'debit' => 'Debit',
-                        'invoice' => 'Invoice',
+                        'credit' => 'إيداع',
+                        'debit' => 'سحب',
+                        'invoice' => 'فاتورة',
                     ]),
             ])
             ->defaultSort('created_at', 'desc')

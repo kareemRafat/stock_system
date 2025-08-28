@@ -93,10 +93,8 @@ class SupplierInvoiceResource extends Resource
                         Forms\Components\TextInput::make('subtotal')
                             ->label('الإجمالي')
                             ->numeric()
-                            ->dehydrated(true) // يتخزن في الداتابيز
-                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                $set('total', $get('quantity') * $get('price'));
-                            }),
+                            ->required()
+                            ->dehydrated(true), // يتخزن في الداتابيز
                     ])
                     ->columns(5)
                     ->addActionLabel('إضافة صنف جديد')
@@ -136,18 +134,6 @@ class SupplierInvoiceResource extends Resource
 
             ])
             ->filters([
-                Tables\Filters\Filter::make('paid_status')
-                    ->form([
-                        Forms\Components\Toggle::make('pending_only')
-                            ->label('عرض الفواتير غير المدفوعة')
-                            ->default(false),
-                    ])
-                    ->query(
-                        fn($query, array $data) =>
-                        $data['pending_only'] ? $query->where('status', 'pending') : null
-                    )
-                    ->columnSpanFull(),
-
                 Tables\Filters\SelectFilter::make('supplier_id')
                     ->label('اسم المورد')
                     ->options(fn() => Supplier::query()->pluck('name', 'id')->toArray())
@@ -158,8 +144,6 @@ class SupplierInvoiceResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('عرض الفاتورة'),
-                // ممكن تضيف Action للدفع زي العملاء
-                // PaySupplierInvoiceAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -182,6 +166,7 @@ class SupplierInvoiceResource extends Resource
         return [
             'index' => Pages\ListSupplierInvoices::route('/'),
             'create' => Pages\CreateSupplierInvoice::route('/create'),
+            'view' => Pages\ViewSupplierInvoice::route('/{record}'),
             'edit' => Pages\EditSupplierInvoice::route('/{record}/edit'),
         ];
     }

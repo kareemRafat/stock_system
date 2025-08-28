@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Supplier;
@@ -9,10 +10,8 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\SupplierResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\SupplierResource\RelationManagers;
+
 
 class SupplierResource extends Resource
 {
@@ -28,7 +27,7 @@ class SupplierResource extends Resource
 
     protected static ?string $modelLabel = 'مورد';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -87,6 +86,12 @@ class SupplierResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\Action::make('wallet')
+                    ->label('حركة الرصيد')
+                    ->color('teal')
+                    ->extraAttributes(['class' => 'font-semibold'])
+                    ->url(fn($record) => route('filament.admin.resources.suppliers.wallet', $record))
+                    ->icon('heroicon-o-wallet'),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -109,6 +114,7 @@ class SupplierResource extends Resource
             'index' => Pages\ListSuppliers::route('/'),
             // 'create' => Pages\CreateSupplier::route('/create'),
             'edit' => Pages\EditSupplier::route('/{record}/edit'),
+            'wallet' => Pages\SupplierWalletPage::route('/{record}/wallet'),
         ];
     }
 }

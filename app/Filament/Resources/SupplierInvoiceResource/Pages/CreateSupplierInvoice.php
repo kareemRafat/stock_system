@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\SupplierInvoiceResource\Pages;
 
-use App\Filament\Resources\SupplierInvoiceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\SupplierInvoiceResource;
 
 class CreateSupplierInvoice extends CreateRecord
 {
@@ -31,4 +31,5 @@ class CreateSupplierInvoice extends CreateRecord
             }
         }
     }
+
 }
