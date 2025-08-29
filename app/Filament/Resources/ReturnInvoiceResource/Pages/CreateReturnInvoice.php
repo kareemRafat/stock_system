@@ -30,14 +30,36 @@ class CreateReturnInvoice extends CreateRecord
             $originalInvoice = Invoice::with('items.product')->find($this->originalInvoiceId);
 
             if ($originalInvoice) {
-                // Prefill the form with original invoice data
-                $itemsData = $originalInvoice->items->map(function ($item) {
-                    return [
-                        'product_id' => $item->product_id,
-                        'quantity_returned' => $item->quantity,
-                    ];
-                })->toArray();
+                // هات كل المرتجعات المرتبطة بالفاتورة الأصلية مرة واحدة
+                $returns = \App\Models\ReturnInvoiceItem::whereHas('returnInvoice', function ($q) use ($originalInvoice) {
+                    $q->where('original_invoice_id', $originalInvoice->id);
+                })
+                    ->selectRaw('product_id, SUM(quantity_returned) as total_returned')
+                    ->groupBy('product_id')
+                    ->pluck('total_returned', 'product_id');
+                // هترجع مصفوفة [product_id => total_returned]
 
+                // جهّز بيانات الأصناف مع استبعاد اللي خلصت (remaining <= 0)
+                $itemsData = $originalInvoice->items
+                    ->map(function ($item) use ($returns) {
+                        $totalReturned = $returns[$item->product_id] ?? 0;
+                        $remaining = $item->quantity - $totalReturned;
+
+                        if ($remaining <= 0) {
+                            return null; // تجاهل الصنف اللي خلص
+                        }
+
+                        return [
+                            'product_id' => $item->product_id,
+                            'quantity' => $remaining,
+                            'quantity_returned' => 0,
+                        ];
+                    })
+                    ->filter()   // شيل الـ null
+                    ->values()   // رتب العناصر من الأول
+                    ->toArray();
+
+                // املأ الفورم
                 $this->form->fill([
                     'customer_id' => $originalInvoice->customer_id,
                     'original_invoice_number' => $originalInvoice->invoice_number,
@@ -46,11 +68,11 @@ class CreateReturnInvoice extends CreateRecord
                     'notes' => $originalInvoice->notes,
                     'items' => $itemsData,
                 ]);
-            } else {
-                // $this->notify('error', 'Original invoice not found.');
             }
         }
     }
+
+
 
     protected function handleRecordCreation(array $data): Model
     {
@@ -58,7 +80,6 @@ class CreateReturnInvoice extends CreateRecord
         // Extract items data
         $items = $data['items'] ?? [];
         unset($data['items']);
-
 
         // Calculate total amount
         $totalAmount = 0;
@@ -74,11 +95,20 @@ class CreateReturnInvoice extends CreateRecord
         $data['total_amount'] = $totalAmount;
 
         return DB::transaction(function () use ($data, $items) {
-            // Create the return invoice (returnInvoice)
+            // Create the return invoice
             $returnInvoice = static::getModel()::create($data);
 
-            // Create the items (retrunInvoiceItem)
             foreach ($items as $item) {
+                // return all if the checbox is checked
+                if (!empty($item['return_all']) && $item['return_all']) {
+                    $item['quantity_returned'] = $item['quantity'];
+                }
+
+                //تجاهل الصنف لو المرتجع = 0 أو أقل
+                if (empty($item['quantity_returned']) || $item['quantity_returned'] <= 0) {
+                    continue;
+                }
+
                 $product = Product::find($item['product_id']);
                 $price = $product->price ?? 0;
                 $subtotal = $item['quantity_returned'] * $price;
@@ -89,6 +119,11 @@ class CreateReturnInvoice extends CreateRecord
                     'price' => $price,
                     'subtotal' => $subtotal,
                 ]);
+
+                // تعديل المخزون: إضافة الكمية المرتجعة مرة أخرى
+                if ($product) {
+                    $product->increment('stock_quantity', $item['quantity_returned']);
+                }
             }
 
             return $returnInvoice;
@@ -97,10 +132,17 @@ class CreateReturnInvoice extends CreateRecord
         return $returnInvoice;
     }
 
-
-
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    // to remove add and add more
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction(), // زر إضافة فقط
+            $this->getCancelFormAction(), // زر إلغاء يرجع للـ index
+        ];
     }
 }

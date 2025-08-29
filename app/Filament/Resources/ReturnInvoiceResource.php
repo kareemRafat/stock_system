@@ -15,8 +15,13 @@ class ReturnInvoiceResource extends Resource
     protected static ?string $model = ReturnInvoice::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-uturn-left';
+
+    protected static ?string $navigationGroup = 'الطلبيات والفواتير';
+
     protected static ?string $navigationLabel = 'فواتير المرتجعات';
+
     protected static ?string $pluralModelLabel = 'فواتير المرتجعات';
+
     protected static ?string $modelLabel = 'فاتورة مرتجع';
 
     public static function form(Form $form): Form
@@ -60,10 +65,20 @@ class ReturnInvoiceResource extends Resource
                             })
                             ->required(),
 
+                        Forms\Components\TextInput::make('quantity')
+                            ->label('الكمية')
+                            ->numeric()
+                            ->readOnly(),
+
                         Forms\Components\TextInput::make('quantity_returned')
                             ->label('الكمية المرتجعة')
                             ->numeric()
+                            ->default(0)
                             ->required(),
+
+                        Forms\Components\Checkbox::make('return_all')
+                            ->label('إرجاع السلعة بالكامل')
+                            ->helperText('في حالة الاختيار يتم ارجاع السلعة بالكامل'),
                     ])
                     ->columns(4)
                     ->columnSpanFull()
@@ -109,9 +124,7 @@ class ReturnInvoiceResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-
-        ];
+        return [];
     }
 
     public static function getPages(): array
