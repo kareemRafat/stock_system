@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Actions\InvoiceActions\AddReturnAction;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Invoice;
@@ -130,8 +131,8 @@ class InvoiceResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->label('عرض الفاتورة'),
-                // Tables\Actions\EditAction::make(),
                 PayInvoiceAction::make(),
+                AddReturnAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
