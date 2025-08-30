@@ -22,7 +22,9 @@ class InvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
 
-    protected static ?string $navigationGroup = 'الطلبيات والفواتير';
+    protected static ?string $navigationGroup = 'العملاء والمنتجات';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $modelLabel = 'فاتورة'; // Singular
 
@@ -326,20 +328,20 @@ class InvoiceResource extends Resource
         ];
     }
 
-    public static function getNavigationItems(): array
-    {
-        return array_merge(
-            parent::getNavigationItems(),
-            [
-                NavigationItem::make()
-                    ->label('اضافة فاتورة جديدة')
-                    ->icon('heroicon-o-plus-circle')
-                    ->activeIcon('heroicon-s-plus-circle')
-                    ->isActiveWhen(fn() => request()->path() === 'invoices/create')
-                    ->group('الطلبيات والفواتير')
-                    ->sort(2)
-                    ->url(static::getUrl('create')),
-            ]
-        );
-    }
+    // public static function getNavigationItems(): array
+    // {
+    //     return array_merge(
+    //         parent::getNavigationItems(),
+    //         [
+    //             NavigationItem::make()
+    //                 ->label('اضافة فاتورة جديدة')
+    //                 ->icon('heroicon-o-plus-circle')
+    //                 ->activeIcon('heroicon-s-plus-circle')
+    //                 ->isActiveWhen(fn() => request()->path() === 'invoices/create')
+    //                 ->group('الطلبيات والفواتير')
+    //                 ->sort(2)
+    //                 ->url(static::getUrl('create')),
+    //         ]
+    //     );
+    // }
 }

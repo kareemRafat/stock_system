@@ -16,7 +16,9 @@ class ReturnInvoiceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-uturn-left';
 
-    protected static ?string $navigationGroup = 'الطلبيات والفواتير';
+    protected static ?string $navigationGroup = 'العملاء والمنتجات';
+
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $navigationLabel = 'فواتير المرتجعات';
 

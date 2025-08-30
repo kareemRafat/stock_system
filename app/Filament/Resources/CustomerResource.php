@@ -22,6 +22,9 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationGroup = 'العملاء والمنتجات';
 
+    protected static ?int $navigationSort = 1;
+
+
     protected static ?string $modelLabel = 'عميل'; // Singular
 
     protected static ?string $pluralModelLabel = 'العملاء'; // Plural

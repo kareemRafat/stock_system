@@ -18,13 +18,13 @@ class OutsourcedProductionResource extends Resource
 {
     protected static ?string $model = OutsourcedProduction::class;
 
-    protected static ?string $navigationGroup = 'العملاء والمنتجات';
+    protected static ?string $navigationGroup = 'الموردين';
+
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $modelLabel = 'اوردر تصنيع'; // Singular
 
     protected static ?string $pluralModelLabel = 'التصنيع الخارجي'; // Plural
-
-    protected static ?int $navigationSort = 3;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
 

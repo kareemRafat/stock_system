@@ -20,6 +20,8 @@ class ProductResource extends Resource
 
     protected static ?string $navigationGroup = 'العملاء والمنتجات';
 
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'منتج'; // Singular
 
     protected static ?string $pluralModelLabel = 'المنتجات'; // Plural
@@ -28,7 +30,7 @@ class ProductResource extends Resource
 
     protected static ?string $activeNavigationIcon = 'heroicon-s-bolt';
 
-    protected static ?int $navigationSort = 2;
+
 
     public static function form(Form $form): Form
     {

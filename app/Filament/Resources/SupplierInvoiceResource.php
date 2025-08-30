@@ -21,8 +21,13 @@ class SupplierInvoiceResource extends Resource
     protected static ?string $model = SupplierInvoice::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationGroup = 'الطلبيات والفواتير';
+
+    protected static ?string $navigationGroup = 'الموردين';
+
+    protected static ?int $navigationSort = 2;
+
     protected static ?string $modelLabel = 'فاتورة مورد';
+
     protected static ?string $pluralModelLabel = 'فواتير الموردين';
 
     public static function form(Form $form): Form
