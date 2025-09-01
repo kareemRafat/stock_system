@@ -120,7 +120,8 @@ class ReturnInvoiceResource extends Resource
                     ->label('عرض'),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                    ->extraAttributes(['class' => 'font-semibold']),
             ]);
     }
 

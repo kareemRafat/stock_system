@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SupplierInvoiceResource\Pages;
 
 use Filament\Actions;
+use App\Models\ProductPurchase;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\SupplierInvoiceResource;
 
@@ -17,19 +18,48 @@ class CreateSupplierInvoice extends CreateRecord
 
     protected function afterCreate(): void
     {
+
         foreach ($this->record->items as $item) {
 
-            //! rev this
-            if ($item->sell_price && $item->product) {
-                $item->product->update([
-                    'production_price' => $item->sell_price, // update product table
-                ]);
-            }
+            // 1. إضافة ProductPurchase للتتبع التفصيلي
+            ProductPurchase::create([
+                'product_id' => $item->product_id,
+                'supplier_id' => $this->record->supplier_id,
+                'quantity' => $item->quantity,
+                'purchase_price' => $item->price, // سعر الشراء من الفاتورة
+                'total_cost' => $item->subtotal, // أو $item->quantity * $item->price
+                'purchase_date' => $this->record->invoice_date,
+                'supplier_invoice_number' => $this->record->invoice_number,
+                'notes' => "فاتورة رقم: {$this->record->invoice_number} - مورد: {$this->record->supplier->name}",
+            ]);
 
-            if ($item->product && $item->quantity) {
-                $item->product->increment('stock_quantity', $item->quantity);
+            // 2. تحديث سعر البيع في المنتج (إذا أردت)
+            // if ($item->sell_price && $item->product) {
+            //     $item->product->update([
+            //         'price' => $item->sell_price, // سعر البيع الجديد
+            //     ]);
+            // }
+
+            // 3. تحديث المخزن (سيحدث تلقائياً من ProductPurchase Model)
+            // لكن يمكن إزالة هذا السطر لتجنب التكرار
+            // $item->product->increment('stock_quantity', $item->quantity);
+        }
+
+        // 4. تحديث متوسط التكلفة لكل المنتجات في الفاتورة
+        $productIds = $this->record->items->pluck('product_id')->unique();
+        foreach ($productIds as $productId) {
+            $product = \App\Models\Product::find($productId);
+            if ($product) {
+                $product->updateAverageCost(); // من الـ Model اللي عملناه
             }
         }
+
+        // 5. إظهار رسالة نجاح
+        \Filament\Notifications\Notification::make()
+            ->title('تم حفظ الفاتورة بنجاح')
+            ->body("تم إضافة {$this->record->items->count()} منتج وتحديث المخزن")
+            ->success()
+            ->send();
     }
 
     protected function getHeaderActions(): array

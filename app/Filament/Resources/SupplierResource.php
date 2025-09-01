@@ -113,12 +113,13 @@ class SupplierResource extends Resource
                     ->extraAttributes(['class' => 'font-semibold'])
                     ->url(fn($record) => route('filament.admin.resources.suppliers.wallet', $record))
                     ->icon('heroicon-o-wallet')
-                    ->disabled(fn ($record) => $record->balance == 0),
+                    ->disabled(fn($record) => $record->balance == 0),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->extraAttributes(['class' => 'font-semibold']),
                 ]),
             ]);
     }

@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use App\Models\SupplierInvoice;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -55,7 +56,8 @@ class SupplierInvoiceResource extends Resource
                 Forms\Components\TextInput::make('invoice_number')
                     ->label('رقم الفاتورة')
                     ->required()
-                    ->maxLength(50),
+                    ->maxLength(50)
+                    ->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('total_amount')
                     ->label('إجمالي الفاتورة')
                     ->numeric()
@@ -166,6 +168,7 @@ class SupplierInvoiceResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
+                        ->extraAttributes(['class' => 'font-semibold'])
                         ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin'),
                 ]),
             ]);

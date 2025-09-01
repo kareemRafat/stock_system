@@ -108,7 +108,7 @@ class OutsourcedProductionResource extends Resource
                     ->copyMessage('تم النسخ')
                     ->copyMessageDuration(1500)
                     ->color('indigo'),
-                    Tables\Columns\TextColumn::make('factory_name')
+                Tables\Columns\TextColumn::make('factory_name')
                     ->label('اسم المصنع')
                     ->weight(FontWeight::Medium),
                 Tables\Columns\TextColumn::make('quantity')
@@ -158,7 +158,8 @@ class OutsourcedProductionResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->extraAttributes(['class' => 'font-semibold']),
                 ]),
             ]);
     }

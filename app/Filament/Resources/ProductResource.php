@@ -153,6 +153,7 @@ class ProductResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
+                        ->extraAttributes(['class' => 'font-semibold'])
                         ->hidden(fn() => !Auth::user() || Auth::user()->role->value !== 'admin'),
                 ]),
             ]);

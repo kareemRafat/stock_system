@@ -148,7 +148,8 @@ class UserResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->extraAttributes(['class' => 'font-semibold']),
                 ]),
             ]);
     }
@@ -171,6 +172,6 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-       return  Auth::user()->role->value === 'admin';
+        return  Auth::user()->role->value === 'admin';
     }
 }
