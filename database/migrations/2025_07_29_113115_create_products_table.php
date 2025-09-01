@@ -23,6 +23,10 @@ return new class extends Migration
             $table->string('unit')->nullable();
             // unit وحدة القياس (كرتونة - قطعة - كيلو إلخ)
             $table->timestamps();
+
+            // for performance
+            $table->index(['name', 'type']);
+            $table->index('stock_quantity');
         });
     }
 

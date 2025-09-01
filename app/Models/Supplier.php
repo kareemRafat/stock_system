@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Supplier extends Model
 {
@@ -22,6 +23,12 @@ class Supplier extends Model
         return $this->hasMany(SupplierWallet::class);
     }
 
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(ProductPurchase::class);
+    }
+
+
     public function getBalanceAttribute()
     {
         // use query fore better performance
@@ -38,5 +45,51 @@ class Supplier extends Model
                         ) as balance
                     ")
             ->value('balance') ?? 0;
+    }
+
+    /**
+     * إجمالي المشتريات من هذا المورد
+     */
+    public function getTotalPurchasesValueAttribute(): float
+    {
+        return $this->purchases()->sum('total_cost');
+    }
+
+    /**
+     * عدد عمليات الشراء من هذا المورد
+     */
+    public function getTotalPurchasesCountAttribute(): int
+    {
+        return $this->purchases()->count();
+    }
+
+    /**
+     * آخر عملية شراء
+     */
+    public function getLastPurchaseDateAttribute(): ?string
+    {
+        $lastPurchase = $this->purchases()->latest('purchase_date')->first();
+        return $lastPurchase ? $lastPurchase->purchase_date->format('Y-m-d') : null;
+    }
+
+    /**
+     * متوسط قيمة عمليات الشراء
+     */
+    public function getAveragePurchaseValueAttribute(): float
+    {
+        $count = $this->total_purchases_count;
+        return $count > 0 ? round($this->total_purchases_value / $count, 2) : 0;
+    }
+
+    /**
+     * البحث في الموردين
+     */
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('contact_person', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
+        });
     }
 }
