@@ -33,16 +33,6 @@ class CreateSupplierInvoice extends CreateRecord
                 'notes' => "فاتورة رقم: {$this->record->invoice_number} - مورد: {$this->record->supplier->name}",
             ]);
 
-            // 2. تحديث سعر البيع في المنتج (إذا أردت)
-            // if ($item->sell_price && $item->product) {
-            //     $item->product->update([
-            //         'price' => $item->sell_price, // سعر البيع الجديد
-            //     ]);
-            // }
-
-            // 3. تحديث المخزن (سيحدث تلقائياً من ProductPurchase Model)
-            // لكن يمكن إزالة هذا السطر لتجنب التكرار
-            // $item->product->increment('stock_quantity', $item->quantity);
         }
 
         // 4. تحديث متوسط التكلفة لكل المنتجات في الفاتورة
@@ -50,7 +40,7 @@ class CreateSupplierInvoice extends CreateRecord
         foreach ($productIds as $productId) {
             $product = \App\Models\Product::find($productId);
             if ($product) {
-                $product->updateAverageCost(); // من الـ Model اللي عملناه
+                $product->updateAverageCost(); // model function
             }
         }
 

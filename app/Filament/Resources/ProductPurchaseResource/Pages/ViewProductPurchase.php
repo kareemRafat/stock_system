@@ -27,22 +27,38 @@ class ViewProductPurchase extends ViewRecord
                                 ->weight('semibold')
                                 ->color('rose'),
                             Infolists\Components\TextEntry::make('quantity')
-                                ->label('الكمية'),
+                                ->label('الكمية')
+                                ->weight('semibold'),
                             Infolists\Components\TextEntry::make('product.unit')
-                                ->label('الوحدة'),
+                                ->label('الوحدة')
+                                ->weight('semibold'),
                         ])->columns(2),
 
                     Infolists\Components\Section::make('التكاليف')
                         ->schema([
-                            Infolists\Components\TextEntry::make('purchase_price')->label('سعر الوحدة')->money('EGP'),
-                            Infolists\Components\TextEntry::make('total_cost')->label('التكلفة الإجمالية')->money('EGP'),
-                            Infolists\Components\TextEntry::make('product.average_cost')->label('متوسط التكلفة الحالي')->money('EGP'),
+                            Infolists\Components\TextEntry::make('purchase_price')
+                                ->label('سعر الوحدة')
+                                ->money('EGP')
+                                ->weight('semibold'),
+                            Infolists\Components\TextEntry::make('total_cost')
+                                ->label('التكلفة الإجمالية')
+                                ->money('EGP')
+                                ->weight('semibold'),
+                            Infolists\Components\TextEntry::make('product.average_cost')
+                                ->label('متوسط التكلفة الحالي')
+                                ->money('EGP')
+                                ->weight('semibold'),
                         ])->columns(3),
 
                     Infolists\Components\Section::make('معلومات إضافية')
                         ->schema([
-                            Infolists\Components\TextEntry::make('purchase_date')->label('تاريخ الشراء')->date('d/m/Y'),
-                            Infolists\Components\TextEntry::make('supplier_invoice_number')->label('رقم فاتورة المورد'),
+                            Infolists\Components\TextEntry::make('purchase_date')
+                                ->label('تاريخ الشراء')
+                                ->date('d/m/Y')
+                                ->weight('semibold'),
+                            Infolists\Components\TextEntry::make('supplier_invoice_number')
+                                ->label('رقم فاتورة المورد')
+                                ->weight('semibold'),
                         ])->columns(2),
                 ])->columnSpanFull(),
             ])->columns(3);

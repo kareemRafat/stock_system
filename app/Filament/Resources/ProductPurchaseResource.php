@@ -16,8 +16,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\ProductPurchaseResource\Pages;
 use App\Filament\Resources\ProductPurchaseResource\RelationManagers;
-use Filament\Infolists\Infolist;
-use Filament\Infolists;
 
 class ProductPurchaseResource extends Resource
 {
@@ -44,6 +42,10 @@ class ProductPurchaseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(
+                fn($query) =>
+                $query->with(['product', 'supplier'])
+            )
             ->defaultSort('purchase_date', 'desc')
             ->recordUrl(null) // This disables row clicking
             ->recordAction(null) // prevent clickable row

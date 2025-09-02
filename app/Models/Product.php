@@ -92,7 +92,6 @@ class Product extends Model
     }
 
 
-
     /**
      * هامش الربح (%)
      */
