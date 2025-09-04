@@ -118,6 +118,7 @@ class UserResource extends Resource
                     ->weight(FontWeight::Medium),
                 Tables\Columns\TextColumn::make('username')
                     ->label('إسم الدخول')
+                    ->fontFamily(FontFamily::Sans)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('role')
                     ->label('الوظيفة')

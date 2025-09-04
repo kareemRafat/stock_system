@@ -29,6 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('/')
             ->login(Login::class)
+            ->font('Readex Pro')
             ->colors([
                 'primary' => Color::Blue,
                 'danger' => Color::Red,
