@@ -13,4 +13,17 @@ class ViewReturnInvoice extends ViewRecord
     protected static ?string $title = 'عرض فاتورة المرتجع';
 
     protected static string $view = 'filament.pages.ReturnInvoices.view-return-invoice';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('back')
+                ->label('رجوع')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(function () {
+                    return ReturnInvoiceResource::getUrl('index');
+                }),
+        ];
+    }
 }

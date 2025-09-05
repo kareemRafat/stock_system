@@ -16,19 +16,22 @@ class ViewInvoice extends ViewRecord
     protected static string $view = 'filament.pages.invoices.view-invoice';
 
 
-    // public static function getEloquentQuery()
-    // {
-    //     return parent::getEloquentQuery()->with(['items.product', 'customer']);
-    // }
-
-    public function getRecord(): \App\Models\Invoice
+    public static function getEloquentQuery()
     {
-        return parent::getRecord()->loadMissing(['items.product', 'customer']);
+        return parent::getEloquentQuery()->with(['items.product', 'customer']);
     }
 
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('create_return')
+                ->label('عمل مرتجع')
+                ->color('danger') // Red color
+                ->url(function ($record) {
+                    return url('/return-invoices/create?original_invoice=' . $record->id);
+                })
+                ->openUrlInNewTab(false),
+
             Actions\Action::make('back')
                 ->label('رجوع')
                 ->icon('heroicon-o-arrow-left')

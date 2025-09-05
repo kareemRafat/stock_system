@@ -2,14 +2,15 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Forms\Components\ClientDateTimeFormComponent;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\ReturnInvoice;
 use Filament\Resources\Resource;
+use Filament\Notifications\Notification;
 use App\Filament\Resources\ReturnInvoiceResource\Pages;
+use App\Filament\Forms\Components\ClientDateTimeFormComponent;
 
 class ReturnInvoiceResource extends Resource
 {
@@ -80,7 +81,20 @@ class ReturnInvoiceResource extends Resource
                             ->label('الكمية المرتجعة')
                             ->numeric()
                             ->default(0)
-                            ->required(),
+                            ->required()
+                            ->rules([
+                                'required',
+                                'numeric',
+                                'min:0',
+                                function (callable $get) {
+                                    return function (string $attribute, $value, \Closure $fail) use ($get) {
+                                        $quantity = $get('quantity') ?? 0;
+                                        if ($value > $quantity) {
+                                            $fail("الكمية المرتجعة ($value) لا يمكن أن تكون أكبر من الكمية الأصلية ($quantity).");
+                                        }
+                                    };
+                                },
+                            ]),
 
                         Forms\Components\Checkbox::make('return_all')
                             ->label('إرجاع السلعة بالكامل')

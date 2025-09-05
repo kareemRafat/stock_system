@@ -28,10 +28,10 @@ class ReturnInvoice extends Model
     {
         return $this->belongsTo(Customer::class);
     }
-
-    public function invoice()
+    
+    public function originalInvoice()
     {
-        return $this->belongsTo(Invoice::class);
+        return $this->belongsTo(Invoice::class, 'original_invoice_id');
     }
 
     public function items()
