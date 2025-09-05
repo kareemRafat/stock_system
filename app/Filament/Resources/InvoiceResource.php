@@ -159,6 +159,7 @@ class InvoiceResource extends Resource
                 ->getSearchResultsUsing(
                     fn(string $search) =>
                     Customer::query()
+                        ->where('status', 'enabled')
                         ->where('name', 'like', "%{$search}%")
                         ->limit(50)
                         ->pluck('name', 'id')
