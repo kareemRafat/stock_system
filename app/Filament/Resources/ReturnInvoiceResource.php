@@ -2,13 +2,15 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ReturnInvoiceResource\Pages;
-use App\Models\ReturnInvoice;
+use App\Filament\Forms\Components\ClientDateTime;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\ReturnInvoice;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\DateTimePicker;
+use App\Filament\Resources\ReturnInvoiceResource\Pages;
 
 class ReturnInvoiceResource extends Resource
 {
@@ -51,6 +53,9 @@ class ReturnInvoiceResource extends Resource
                     ->label('ملاحظات')
                     ->columnSpanFull(),
 
+                // get the javascript Date
+                ClientDateTime::make('created_at'),
+
                 Forms\Components\Repeater::make('items')
                     ->label('الأصناف المرتجعة')
                     ->schema([
@@ -91,9 +96,13 @@ class ReturnInvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(null) // This disables row clicking
+            ->recordAction(null) // prevent clickable row
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('return_invoice_number')
                     ->label('رقم الفاتورة')
+                    ->color('indigo')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('customer.name')
@@ -102,22 +111,28 @@ class ReturnInvoiceResource extends Resource
 
                 Tables\Columns\TextColumn::make('original_invoice_number')
                     ->label('فاتورة المبيعات')
-                    ->searchable(),
+                    ->color('orange')
+                    ->searchable()
+                    ->url(fn($record) => url("/invoices/{$record->original_invoice_id}"))
+                    ->openUrlInNewTab(),
 
                 Tables\Columns\TextColumn::make('items_count')
                     ->counts('items')
                     ->label('عدد الأصناف'),
 
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('تاريخ الإنشاء')
-                    ->dateTime('d-m-Y'),
+                Tables\Columns\TextColumn::make('createdDate')
+                    ->label('تاريخ الإنشاء'),
+                Tables\Columns\TextColumn::make('createdTime')
+                    ->label('وقت الإنشاء'),
             ])
+
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->label('عرض'),
+                    ->label('عرض الفاتورة')
+                    ->color('success'),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
@@ -135,6 +150,7 @@ class ReturnInvoiceResource extends Resource
         return [
             'index' => Pages\ListReturnInvoices::route('/'),
             'create' => Pages\CreateReturnInvoice::route('/create'),
+            'view' => Pages\ViewReturnInvoice::route('/{record}'),
             // 'edit' => Pages\EditReturnInvoice::route('/{record}/edit'),
         ];
     }

@@ -16,7 +16,7 @@ class AddReturnAction
             ->url(fn($record) => ReturnInvoiceResource::getUrl('create', [
                 'original_invoice' => $record->id, // هنمرر الـ ID
             ]))
-            ->color('indigo')
-            ->extraAttributes(['class' => 'font-semibold']);
+            ->color('indigo');
+            // ->extraAttributes(['class' => 'font-semibold']);
     }
 }

@@ -68,18 +68,15 @@ class InvoiceResource extends Resource
                     ->formatStateUsing(fn($state) => strtoupper($state)),
                 Tables\Columns\TextColumn::make('customer.name')
                     ->label('اسم العميل')
-                    ->weight('semibold')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('إجمالي الفاتورة')
-                    ->suffix(' جنيه ')
-                    ->weight('semibold'),
+                    ->suffix(' جنيه '),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الفاتورة')
                     ->color('primary')
                     ->date("d/m/Y")
-                    ->sortable()
-                    ->weight('semibold'),
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('تاريخ التعديل')
                     ->getStateUsing(function ($record) {
@@ -89,8 +86,7 @@ class InvoiceResource extends Resource
                     })
                     ->color(function ($record) {
                         return $record->updated_at ? null : 'danger';
-                    })
-                    ->weight('semibold'),
+                    }),
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
                     ->badge()

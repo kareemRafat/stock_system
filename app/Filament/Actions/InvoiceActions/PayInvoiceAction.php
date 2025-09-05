@@ -20,7 +20,7 @@ class PayInvoiceAction
             ->disabled(fn($record) => $record->status === 'paid')
             ->modalSubmitActionLabel('تسديد فاتورة')
             ->modalHeading(
-                fn(Model $record) => new HtmlString('تسديد فاتورة العميل: ' . "<span style='color: #3b82f6 !important;font-weight:bold'>{$record->customer->name}</span>")
+                fn(Model $record) => new HtmlString('تسديد فاتورة العميل: ' . "<span style='color: #3b82f6 !important'>{$record->customer->name}</span>")
             )
             ->form([
                 Forms\Components\TextInput::make('paid')
@@ -126,7 +126,7 @@ class PayInvoiceAction
                 });
             })
             ->color('rose')
-            ->extraAttributes(['class' => 'font-semibold'])
+            // ->extraAttributes(['class' => 'font-semibold'])
             ->icon('heroicon-s-clipboard-document-check');
     }
 }

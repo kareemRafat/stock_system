@@ -76,7 +76,6 @@ class CreateReturnInvoice extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-
         // Extract items data
         $items = $data['items'] ?? [];
         unset($data['items']);
