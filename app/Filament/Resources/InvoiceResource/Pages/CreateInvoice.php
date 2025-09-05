@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use Filament\Actions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
@@ -51,10 +52,8 @@ class CreateInvoice extends CreateRecord
         ];
     }
 
-
     protected function afterCreate(): void
     {
-
         $this->record->update([
             'total_amount' => $this->record->items()->sum('subtotal'),
         ]);

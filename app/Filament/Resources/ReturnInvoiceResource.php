@@ -2,14 +2,13 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Forms\Components\ClientDateTime;
+use App\Filament\Forms\Components\ClientDateTimeFormComponent;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\ReturnInvoice;
 use Filament\Resources\Resource;
-use Filament\Forms\Components\DateTimePicker;
 use App\Filament\Resources\ReturnInvoiceResource\Pages;
 
 class ReturnInvoiceResource extends Resource
@@ -54,7 +53,7 @@ class ReturnInvoiceResource extends Resource
                     ->columnSpanFull(),
 
                 // get the javascript Date
-                ClientDateTime::make('created_at'),
+                ClientDateTimeFormComponent::make('created_at'),
 
                 Forms\Components\Repeater::make('items')
                     ->label('الأصناف المرتجعة')

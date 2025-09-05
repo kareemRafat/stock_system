@@ -17,6 +17,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Actions\InvoiceActions\PayInvoiceAction;
+use App\Filament\Forms\Components\ClientDateTimeFormComponent;
 
 class InvoiceResource extends Resource
 {
@@ -72,21 +73,14 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('إجمالي الفاتورة')
                     ->suffix(' جنيه '),
-                Tables\Columns\TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make('createdDate')
                     ->label('تاريخ الفاتورة')
                     ->color('primary')
-                    ->date("d/m/Y")
                     ->sortable(),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('تاريخ التعديل')
-                    ->getStateUsing(function ($record) {
-                        return $record->updated_at
-                            ? \Carbon\Carbon::parse($record->updated_at)->format('d/m/Y')
-                            : 'لم يتم التعديل ';
-                    })
-                    ->color(function ($record) {
-                        return $record->updated_at ? null : 'danger';
-                    }),
+                Tables\Columns\TextColumn::make('createdTime')
+                    ->label('وقت الفاتورة')
+                    ->color('primary')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
                     ->badge()
@@ -179,9 +173,9 @@ class InvoiceResource extends Resource
                 ->helperText('اختر العميل من القائمة أو ابدأ بالكتابة للبحث عن عميل موجود'),
             Forms\Components\Textarea::make('notes')
                 ->columnSpanFull(),
-            Forms\Components\Hidden::make('created_at')
-                ->default(now()->toDateTimeString()),
 
+            // get the javascript Date
+            ClientDateTimeFormComponent::make('created_at')
         ];
     }
 

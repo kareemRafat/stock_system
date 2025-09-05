@@ -4,7 +4,7 @@ namespace App\Filament\Forms\Components;
 
 use Filament\Forms\Components\Hidden;
 
-class ClientDateTime extends Hidden
+class ClientDateTimeFormComponent extends Hidden
 {
     protected function setUp(): void
     {

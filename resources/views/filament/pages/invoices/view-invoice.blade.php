@@ -59,8 +59,8 @@
                         <!-- Date -->
                         <div class="flex items-center flex-col">
                             <span class="mr-1 mb-2">التاريخ:</span>
-                            <span>{{ $this->record->created_at->format('d-m-Y') }}</span>
-                            <span dir="ltr">{{ $this->record->created_at->format('h:m A') }}</span>
+                            <span>{{ $this->record->createdDate }}</span>
+                            <span dir="ltr">{{ $this->record->createdTime }}</span>
                         </div>
 
                     </div>

@@ -89,7 +89,6 @@ class CreateReturnInvoice extends CreateRecord
             $totalAmount += $subtotal;
         }
 
-
         // Add total amount to data
         $data['total_amount'] = $totalAmount;
 
