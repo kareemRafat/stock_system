@@ -204,7 +204,7 @@ class CreateReturnInvoice extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('index');
+        return static::$resource::getUrl('view', ['record' => $this->record]);
     }
 
     // to remove add and add more

@@ -18,6 +18,7 @@ use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Actions\InvoiceActions\PayInvoiceAction;
 use App\Filament\Forms\Components\ClientDateTimeFormComponent;
+use Filament\Support\Enums\FontWeight;
 
 class InvoiceResource extends Resource
 {
@@ -81,6 +82,17 @@ class InvoiceResource extends Resource
                     ->label('وقت الفاتورة')
                     ->color('primary')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('has_returns')
+                    ->label('هل بها مرتجع؟')
+                    ->extraAttributes(['class' => 'text-sm'])
+                    ->icon(
+                        fn($record) => $record->returnInvoices()->exists()
+                            ? 'heroicon-o-arrow-path'
+                            : 'heroicon-o-check'
+                    )
+                    ->iconPosition('before') // or 'after'
+                    ->color(fn($record) => $record->returnInvoices()->exists() ? 'danger' : 'success')
+                    ->formatStateUsing(fn($record) => $record->returnInvoices()->exists() ? 'مرتجع' : 'لا'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
                     ->badge()
@@ -300,8 +312,6 @@ class InvoiceResource extends Resource
                 ->default(0),
         ];
     }
-
-
 
     public static function getRelations(): array
     {

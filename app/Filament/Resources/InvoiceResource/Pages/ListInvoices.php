@@ -19,19 +19,4 @@ class ListInvoices extends ListRecords
                 ->createAnother(false)
         ];
     }
-
-    public function getTabs(): array
-    {
-        return [
-            'all' => Tab::make('كل الفواتير')
-                ->modifyQueryUsing(fn(Builder $query) => $query),
-
-            // 'with_returns' => Tab::make('فواتير بها مرتجع')
-            //     ->modifyQueryUsing(fn(Builder $query) => $query->whereHas('returnInvoices')),
-
-            // 'returns_only' => Tab::make('فواتير المرتجع')
-            //     ->url(route('filament.admin.resources.return-invoices.index'))
-            //     ->icon('heroicon-o-arrow-path'),
-        ];
-    }
 }

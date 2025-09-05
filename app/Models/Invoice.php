@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Invoice extends Model
@@ -25,6 +26,10 @@ class Invoice extends Model
         'created_at' => 'datetime',
     ];
 
+    public function returnInvoices(): HasMany
+    {
+        return $this->hasMany(ReturnInvoice::class, 'original_invoice_id');
+    }
 
     public function customer()
     {
@@ -103,6 +108,20 @@ class Invoice extends Model
     {
         return Attribute::make(
             get: fn($value) => $this->created_at ? Carbon::parse($this->created_at)->format('h:i A') : null,
+        );
+    }
+
+    public function hasReturns(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->returnInvoices()->exists(),
+        );
+    }
+
+    public function returnsCount(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->returnInvoices()->count(),
         );
     }
 }
