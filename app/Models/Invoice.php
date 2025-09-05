@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -114,7 +115,7 @@ class Invoice extends Model
     public function hasReturns(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->returnInvoices()->exists(),
+            get: fn() => $this->returnInvoices->isNotEmpty(), // Uses eager loaded data
         );
     }
 
@@ -123,5 +124,28 @@ class Invoice extends Model
         return Attribute::make(
             get: fn() => $this->returnInvoices()->count(),
         );
+    }
+
+    public function hasReturnableItems()
+    {
+        static $cache = [];
+
+        if (array_key_exists($this->id, $cache)) {
+            return $cache[$this->id];
+        }
+
+        // Efficient database query
+        $result = DB::table('invoice_items')
+            ->where('invoice_id', $this->id)
+            ->whereRaw('quantity > COALESCE((
+            SELECT SUM(rii.quantity_returned)
+            FROM return_invoice_items rii
+            INNER JOIN return_invoices ri ON ri.id = rii.return_invoice_id
+            WHERE ri.original_invoice_id = invoice_items.invoice_id
+            AND rii.product_id = invoice_items.product_id
+        ), 0)')
+            ->exists();
+
+        return $cache[$this->id] = $result;
     }
 }

@@ -15,12 +15,6 @@ class ViewInvoice extends ViewRecord
 
     protected static string $view = 'filament.pages.invoices.view-invoice';
 
-
-    public static function getEloquentQuery()
-    {
-        return parent::getEloquentQuery()->with(['items.product', 'customer']);
-    }
-
     protected function getHeaderActions(): array
     {
         return [
@@ -30,7 +24,14 @@ class ViewInvoice extends ViewRecord
                 ->url(function ($record) {
                     return url('/return-invoices/create?original_invoice=' . $record->id);
                 })
-                ->openUrlInNewTab(false),
+                ->openUrlInNewTab(false)
+                ->disabled(fn($record) => !$record->hasReturnableItems())
+                ->tooltip(
+                    fn($record) =>
+                    $record->hasReturnableItems()
+                        ? 'إنشاء مرتجع للفاتورة'
+                        : 'لا توجد منتجات متاحة للاسترجاع'
+                ),
 
             Actions\Action::make('back')
                 ->label('رجوع')
@@ -40,5 +41,13 @@ class ViewInvoice extends ViewRecord
                     return InvoiceResource::getUrl('index');
                 }),
         ];
+    }
+
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        // Eager load the relationships
+        $this->record->load(['items.product']);
     }
 }

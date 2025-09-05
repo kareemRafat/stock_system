@@ -59,6 +59,12 @@ class InvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function ($query) {
+                // Eager load the necessary relationships
+                return $query->with([
+                    'returnInvoices',
+                ]);
+            })
             ->recordUrl(null) // This disables row clicking
             ->recordAction(null) // prevent clickable row
             ->defaultSort('created_at', 'desc')
@@ -78,21 +84,21 @@ class InvoiceResource extends Resource
                     ->label('تاريخ الفاتورة')
                     ->color('primary')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('createdTime')
-                    ->label('وقت الفاتورة')
-                    ->color('primary')
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('createdTime')
+                //     ->label('وقت الفاتورة')
+                //     ->color('primary')
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('has_returns')
                     ->label('هل بها مرتجع؟')
                     ->extraAttributes(['class' => 'text-sm'])
                     ->icon(
-                        fn($record) => $record->returnInvoices()->exists()
+                        fn($record) => $record->has_returns
                             ? 'heroicon-o-arrow-path'
                             : 'heroicon-o-check'
                     )
                     ->iconPosition('before') // or 'after'
-                    ->color(fn($record) => $record->returnInvoices()->exists() ? 'danger' : 'success')
-                    ->formatStateUsing(fn($record) => $record->returnInvoices()->exists() ? 'مرتجع' : 'لا'),
+                    ->color(fn($record) => $record->has_returns ? 'danger' : 'success')
+                    ->formatStateUsing(fn($record) => $record->has_returns ? 'مرتجع' : 'لا'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
                     ->badge()
@@ -136,7 +142,7 @@ class InvoiceResource extends Resource
                 Tables\Actions\ViewAction::make()
                     ->label('عرض الفاتورة'),
                 PayInvoiceAction::make(),
-                AddReturnAction::make(),
+                // AddReturnAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -160,29 +166,17 @@ class InvoiceResource extends Resource
                 ->rules(['required', 'string', 'max:255']),
             Forms\Components\Select::make('customer_id')
                 ->label('اسم العميل')
-                ->options(
-                    fn() => Customer::query()
+                ->relationship(
+                    name: 'customer',
+                    titleAttribute: 'name',
+                    modifyQueryUsing: fn($query) => $query
                         ->where('status', 'enabled')
                         ->latest()
-                        ->limit(10)
-                        ->pluck('name', 'id')
                 )
                 ->searchable()
-                ->getSearchResultsUsing(
-                    fn(string $search) =>
-                    Customer::query()
-                        ->where('status', 'enabled')
-                        ->where('name', 'like', "%{$search}%")
-                        ->limit(50)
-                        ->pluck('name', 'id')
-                )
-                ->getOptionLabelUsing(
-                    fn($value): ?string =>
-                    Customer::find($value)?->name
-                )
                 ->native(false)
                 ->required()
-                ->preload()
+                ->preload(true, 10)
                 ->helperText('اختر العميل من القائمة أو ابدأ بالكتابة للبحث عن عميل موجود'),
             Forms\Components\Textarea::make('notes')
                 ->columnSpanFull(),
@@ -201,17 +195,23 @@ class InvoiceResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('product_id')
                         ->label('الصنف')
-                        ->relationship(
-                            name: 'product',
-                            titleAttribute: 'name',
-                            modifyQueryUsing: fn($query) => $query->where('stock_quantity', '>', 0),
-                        )
-                        ->preload()
+                        ->options(function () {
+                            static $options;
+
+                            if (!$options) {
+                                $options = \App\Models\Product::where('stock_quantity', '>', 0)
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            }
+
+                            return $options;
+                        })
+                        // ->preload()
                         ->getOptionLabelFromRecordUsing(fn($record) => "{$record->name} - {$record->type}")
                         ->searchable()
                         ->required()
                         ->native(false)
-                        ->live(debounce: 300)
+                        ->reactive()
                         ->afterStateUpdated(function ($state, callable $set, callable $get) {
                             $product  = \App\Models\Product::find($state);
                             $price    = $product?->final_price ?? 0;
@@ -231,14 +231,7 @@ class InvoiceResource extends Resource
                     Forms\Components\TextInput::make('stock_quantity')
                         ->label('المتاح بالمخزن')
                         ->disabled()
-                        ->dehydrated(false)
-                        ->afterStateHydrated(function ($set, $get) {
-                            $productId = $get('product_id');
-                            if ($productId) {
-                                $stock = \App\Models\Product::find($productId)?->stock_quantity ?? 0;
-                                $set('stock_quantity', $stock);
-                            }
-                        }),
+                        ->dehydrated(false),
 
                     Forms\Components\TextInput::make('quantity')
                         ->label('الكمية')
@@ -246,7 +239,7 @@ class InvoiceResource extends Resource
                         ->minValue(1)
                         ->default(1)
                         ->required()
-                        ->live(debounce: 300)
+                        ->live(debounce: 500)
                         ->rule(function (callable $get) {
                             return function (string $attribute, $value, \Closure $fail) use ($get) {
                                 $stock = $get('stock_quantity') ?? 0;
@@ -269,16 +262,8 @@ class InvoiceResource extends Resource
                         ->label('السعر')
                         ->numeric()
                         ->required()
-                        ->live(debounce: 300)
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            $quantity = $get('quantity') ?? 1;
-                            $set('subtotal', round($state * $quantity, 2));
-
-                            // Recalculate total
-                            $items = $get('../../items') ?? [];
-                            $total = collect($items)->sum('subtotal');
-                            $set('../../total_amount', round($total, 2));
-                        }),
+                        ->disabled()
+                        ->dehydrated(),
 
                     Forms\Components\TextInput::make('subtotal')
                         ->label('الإجمالي')
@@ -329,21 +314,4 @@ class InvoiceResource extends Resource
             'view' => Pages\ViewInvoice::route('/{record}'),
         ];
     }
-
-    // public static function getNavigationItems(): array
-    // {
-    //     return array_merge(
-    //         parent::getNavigationItems(),
-    //         [
-    //             NavigationItem::make()
-    //                 ->label('اضافة فاتورة جديدة')
-    //                 ->icon('heroicon-o-plus-circle')
-    //                 ->activeIcon('heroicon-s-plus-circle')
-    //                 ->isActiveWhen(fn() => request()->path() === 'invoices/create')
-    //                 ->group('الطلبيات والفواتير')
-    //                 ->sort(2)
-    //                 ->url(static::getUrl('create')),
-    //         ]
-    //     );
-    // }
 }

@@ -16,7 +16,13 @@ class AddReturnAction
             ->url(fn($record) => ReturnInvoiceResource::getUrl('create', [
                 'original_invoice' => $record->id, // هنمرر الـ ID
             ]))
-            ->color('indigo');
-            // ->extraAttributes(['class' => 'font-semibold']);
+            ->color('indigo')
+            ->tooltip(
+                fn($record) => $record->hasReturnableItems()
+                    ? 'إنشاء مرتجع للفاتورة'
+                    : 'لا توجد منتجات متاحة للاسترجاع'
+            )
+            ->disabled(fn($record) => !$record->hasReturnableItems());
+        // ->extraAttributes(['class' => 'font-semibold']);
     }
 }

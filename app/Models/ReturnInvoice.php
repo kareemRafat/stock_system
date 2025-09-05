@@ -28,7 +28,7 @@ class ReturnInvoice extends Model
     {
         return $this->belongsTo(Customer::class);
     }
-    
+
     public function originalInvoice()
     {
         return $this->belongsTo(Invoice::class, 'original_invoice_id');
@@ -38,7 +38,6 @@ class ReturnInvoice extends Model
     {
         return $this->hasMany(ReturnInvoiceItem::class);
     }
-
 
     protected function createdAt(): Attribute
     {

@@ -59,41 +59,35 @@ class ProductPurchaseResource extends Resource
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label('المورد')
                     ->searchable()
-                    ->sortable()
-                    ->weight(FontWeight::SemiBold),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('quantity')
                     ->label('الكمية')
                     ->sortable()
-                    ->alignCenter()
-                    ->weight(FontWeight::SemiBold),
+                    ->alignCenter(),
 
                 Tables\Columns\TextColumn::make('purchase_price')
                     ->label('سعر الشراء')
-                    ->money('EGP')
-                    ->sortable()
-                    ->weight(FontWeight::SemiBold),
+                    ->suffix(' ج.م ')
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('total_cost')
                     ->label('التكلفة الإجمالية')
-                    ->money('EGP')
+                    ->suffix(' ج.م ')
                     ->sortable()
                     ->summarize([
                         Tables\Columns\Summarizers\Sum::make()
                             ->money('EGP'),
-                    ])
-                    ->weight(FontWeight::SemiBold),
+                    ]),
 
                 Tables\Columns\TextColumn::make('purchase_date')
                     ->label('تاريخ الشراء')
                     ->date('d/m/Y')
-                    ->sortable()
-                    ->weight(FontWeight::SemiBold),
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('supplier_invoice_number')
                     ->label('رقم فاتورة المورد')
-                    ->toggleable(true)
-                    ->weight(FontWeight::SemiBold),
+                    ->toggleable(true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('supplier_id')
