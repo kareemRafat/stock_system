@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions\InvoiceActions;
 
+use App\Filament\Forms\Components\ClientDateTimeFormComponent;
 use Filament\Forms;
 use App\Models\CustomerWallet;
 use App\Models\Invoice;
@@ -54,6 +55,8 @@ class PayInvoiceAction
                         $color = $balance > 0 ? '#16a34a' : ($balance < 0 ? '#dc2626' : '#1f2937'); // green/red/gray
                         return ['style' => "color: {$color}; font-weight: 700;"];
                     }),
+                    // get js date
+                    ClientDateTimeFormComponent::make('created_at'),
             ])
             ->action(function (array $data, Model $record) {
                 if ($data['paid'] <= 0 && (empty($data['removeFromWallet']) || !$data['removeFromWallet'])) {

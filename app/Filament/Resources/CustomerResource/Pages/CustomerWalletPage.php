@@ -57,33 +57,40 @@ class CustomerWalletPage extends Page implements Tables\Contracts\HasTable
                 Tables\Columns\TextColumn::make('amount')
                     ->label('الكمية')
                     ->money('egp')
+                    ->formatStateUsing(fn($state) => number_format((float) $state, 2, '.', ','))
+                    ->suffix(' ج.م')
                     ->summarize([
                         \Filament\Tables\Columns\Summarizers\Summarizer::make()
                             ->using(
                                 fn(\Illuminate\Database\Query\Builder $query) =>
                                 $query->clone()->selectRaw("
-                    SUM(
-                        CASE
-                            WHEN type = 'debit' THEN -amount
-                            WHEN type = 'invoice' THEN -amount
-                            WHEN type = 'credit' THEN amount
-                            ELSE 0
-                        END
-                    ) as balance
-                ")->value('balance') ?? 0
+                                    SUM(
+                                        CASE
+                                            WHEN type = 'debit' THEN -amount
+                                            WHEN type = 'invoice' THEN -amount
+                                            WHEN type = 'credit' THEN amount
+                                            ELSE 0
+                                        END
+                                    ) as balance
+                                ")->value('balance') ?? 0
                             )
                             ->label('الرصيد الكلي')
-                            ->money('egp'),
+                            ->money('egp')
+                            ->formatStateUsing(fn($state) => number_format($state, 2) . ' ج.م'),
+
                     ]),
                 Tables\Columns\TextColumn::make('invoice.invoice_number')
                     ->label('سحب بالفاتورة')
                     ->default('لايوجد'),
                 Tables\Columns\TextColumn::make('notes')
                     ->label('ملاحظات الحركة')
+                    ->default('لايوجد')
                     ->limit(40),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('تاريخ الإضافة')
-                    ->date('d-m-Y'),
+                Tables\Columns\TextColumn::make('createdDate')
+                    ->label('تاريخ الإضافة'),
+                Tables\Columns\TextColumn::make('createdTime')
+                    ->label('تاريخ الإضافة'),
+
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')

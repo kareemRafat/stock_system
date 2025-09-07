@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions\CustomerActions;
 
+use App\Filament\Forms\Components\ClientDateTimeFormComponent;
 use Filament\Forms;
 use App\Models\CustomerWallet;
 use Illuminate\Support\HtmlString;
@@ -28,6 +29,8 @@ class AdjustBalanceAction
                 Forms\Components\Textarea::make('notes')
                     ->label('ملاحظات الإضافة')
                     ->columnSpanFull(),
+                // js date
+                ClientDateTimeFormComponent::make('created_at')
             ])
             ->action(function (array $data, Model $record) {
                 // Create the wallet transaction
@@ -36,7 +39,7 @@ class AdjustBalanceAction
                     'type' => 'credit',
                     'amount' => $data['amount'],
                     'notes' => $data['notes'],
-                    'created_at' => now()->format('Y-m-d H:i:s'),
+                    // 'created_at' => now()->format('Y-m-d H:i:s'),
                 ]);
 
                 Notification::make()
