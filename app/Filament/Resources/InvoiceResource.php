@@ -82,12 +82,10 @@ class InvoiceResource extends Resource
                     ->suffix(' جنيه '),
                 Tables\Columns\TextColumn::make('createdDate')
                     ->label('تاريخ الفاتورة')
-                    ->color('primary')
-                    ->sortable(),
+                    ->color('primary'),
                 // Tables\Columns\TextColumn::make('createdTime')
                 //     ->label('وقت الفاتورة')
-                //     ->color('primary')
-                //     ->sortable(),
+                //     ->color('primary'),
                 Tables\Columns\TextColumn::make('has_returns')
                     ->label('هل بها مرتجع؟')
                     ->extraAttributes(['class' => 'text-sm'])
