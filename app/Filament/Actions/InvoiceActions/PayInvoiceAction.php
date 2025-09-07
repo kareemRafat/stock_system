@@ -29,7 +29,7 @@ class PayInvoiceAction
                     ->required()
                     ->default(0)
                     ->dehydrated()
-                    ->helperText('فى حالة تبقى مبلغ سيتم اضافته الى محفظة العميل')
+                    ->helperText('فى حالة تبقى مبلغ سيتم اضافته الى محفظة العميل - وفي حالة وجود مديونية للعميل سيتم سحب المديونية من الرصيد')
                     ->columnSpan(1),
                 Forms\Components\Toggle::make('removeFromWallet')
                     ->label('خصم من محفظة العميل')
@@ -57,76 +57,109 @@ class PayInvoiceAction
             ])
             ->action(function (array $data, Model $record) {
                 if ($data['paid'] <= 0 && (empty($data['removeFromWallet']) || !$data['removeFromWallet'])) {
-                    Notification::make()
-                        ->title('حدث خطأ فى تسديد الفاتورة لعدم ادخال المبلغ المدفوع او عدم اختيار السداد من الرصيد')
-                        ->warning()
-                        ->send();
-                    return; // or return null;
+                    return self::notifyError('حدث خطأ: لم يتم إدخال مبلغ أو اختيار السداد من الرصيد');
                 }
 
                 DB::transaction(function () use ($data, $record) {
-                    // التحقق من وجود طريقة دفع
-                    if ($data['paid'] <= 0 && (empty($data['removeFromWallet']) || !$data['removeFromWallet'])) {
-                        Notification::make()
-                            ->title('يجب إدخال مبلغ أو استخدام الرصيد')
-                            ->warning()
-                            ->send();
-                        return;
-                    }
+                    $customer = $record->customer;
+                    $paid = $data['paid'] ?? 0;
+                    $total = $record->total_amount;
 
-                    $walletAmountUsed = 0;
+                    $walletUsed = self::useWalletIfRequested($customer, $record, $paid, $total, $data);
+                    $remaining = self::calculateRemaining($paid, $total, $walletUsed);
 
-                    // 1 - استخدام رصيد المحفظة إذا طُلب ذلك
-                    if (isset($data['removeFromWallet']) && $data['removeFromWallet']) {
-                        $availableBalance = $record->customer->balance;
-                        $remainingAmount = $record->total_amount - $data['paid'];
-                        $walletAmountUsed = min($availableBalance, max(0, $remainingAmount));
+                    self::handleRemaining($customer, $record, $remaining);
+                    self::updateInvoiceStatus($record, $remaining);
 
-                        // خصم من المحفظة إذا كان هناك مبلغ للاستخدام
-                        if ($walletAmountUsed > 0) {
-                            $record->customer->wallet()->create([
-                                'type' => 'debit',
-                                'amount' => $walletAmountUsed,
-                                'invoice_id' => $record->id,
-                                'invoice_number' => $record->invoice_number,
-                            ]);
-                        }
-                    }
-
-                    // 2 - حساب الفرق بناءً على المدفوع فقط (بدون المحفظة)
-                    $difference = $data['paid'] - $record->total_amount;
-
-                    if ($difference > 0) {
-                        // دفع زائد → إضافة للرصيد
-                        $record->customer->wallet()->create([
-                            'type' => 'credit',
-                            'amount' => $difference,
-                            'invoice_id' => $record->id,
-                            'invoice_number' => $record->invoice_number,
-                        ]);
-                    } elseif ($difference < 0 && (!isset($data['removeFromWallet']) || !$data['removeFromWallet'])) {
-                        // نقص في الدفع → خصم من الرصيد (فقط عند عدم استخدام المحفظة)
-                        $record->customer->wallet()->create([
-                            'type' => 'debit',
-                            'amount' => abs($difference),
-                            'invoice_id' => $record->id,
-                            'invoice_number' => $record->invoice_number,
-                        ]);
-                    }
-
-                    // 3 - تحديث حالة الفاتورة
-                    $record->update([
-                        'status' => 'paid'
-                    ]);
-
-                    Notification::make()
-                        ->title('تمت تسديد الفاتورة بنجاح')
-                        ->success()
-                        ->send();
+                    self::notifySuccess('تمت عملية التسديد بنجاح');
                 });
             })
             ->color('rose')
             // ->extraAttributes(['class' => 'font-semibold'])
             ->icon('heroicon-s-clipboard-document-check');
+    }
+
+    protected static function useWalletIfRequested($customer, $record, $paid, $total, $data): float
+    {
+        $walletAmountUsed = 0;
+
+        if (!empty($data['removeFromWallet']) && $data['removeFromWallet']) {
+            $remaining = $total - $paid;
+            $availableBalance = $customer->balance;
+
+            if ($remaining > 0) {
+                $walletAmountUsed = min($availableBalance, $remaining);
+
+                if ($walletAmountUsed > 0) {
+                    $customer->wallet()->create([
+                        'type' => 'debit',
+                        'amount' => $walletAmountUsed,
+                        'invoice_id' => $record->id,
+                        'invoice_number' => $record->invoice_number,
+                        'notes' => 'خصم من المحفظة لسداد الفاتورة',
+                    ]);
+                }
+            }
+        }
+
+        return $walletAmountUsed;
+    }
+
+    protected static function calculateRemaining($paid, $total, $walletUsed): float
+    {
+        return $total - ($paid + $walletUsed);
+    }
+
+    protected static function handleRemaining($customer, $record, float $remaining): void
+    {
+        if ($remaining > 0) {
+            $customer->wallet()->create([
+                'type' => 'debit',
+                'amount' => $remaining,
+                'invoice_id' => $record->id,
+                'invoice_number' => $record->invoice_number,
+                'notes' => 'مديونية متبقية من الفاتورة',
+            ]);
+        } elseif ($remaining < 0) {
+            $customer->wallet()->create([
+                'type' => 'credit',
+                'amount' => abs($remaining),
+                'invoice_id' => $record->id,
+                'invoice_number' => $record->invoice_number,
+                'notes' => 'رصيد زائد من الفاتورة',
+            ]);
+        }
+    }
+
+    protected static function updateInvoiceStatus($record, float $remaining): void
+    {
+
+        $record->update(['status' => 'paid']);
+
+        /*
+        if ($remaining == 0) {
+            $record->update(['status' => 'paid']);
+        } elseif ($remaining > 0) {
+            $record->update(['status' => 'pending']);
+        } else {
+            $record->update(['status' => 'paid']);
+        }
+        */
+    }
+
+    protected static function notifyError(string $message)
+    {
+        Notification::make()
+            ->title($message)
+            ->warning()
+            ->send();
+    }
+
+    protected static function notifySuccess(string $message)
+    {
+        Notification::make()
+            ->title($message)
+            ->success()
+            ->send();
     }
 }

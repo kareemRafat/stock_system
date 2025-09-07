@@ -20,7 +20,8 @@ class ViewInvoice extends ViewRecord
         return [
             Actions\Action::make('create_return')
                 ->label('عمل مرتجع')
-                ->color('danger') // Red color
+                ->color('rose')
+                ->icon('heroicon-s-arrow-path')
                 ->url(function ($record) {
                     return url('/return-invoices/create?original_invoice=' . $record->id);
                 })

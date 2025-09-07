@@ -53,24 +53,37 @@ class CustomerWalletPage extends Page implements Tables\Contracts\HasTable
                         'debit' => 'سحب',
                         'invoice' => 'فاتورة',
                         default => $state,
-                    })
-                    ->weight('semibold'),
+                    }),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('الكمية')
                     ->money('egp')
-                    ->weight('semibold'),
+                    ->summarize([
+                        \Filament\Tables\Columns\Summarizers\Summarizer::make()
+                            ->using(
+                                fn(\Illuminate\Database\Query\Builder $query) =>
+                                $query->clone()->selectRaw("
+                    SUM(
+                        CASE
+                            WHEN type = 'debit' THEN -amount
+                            WHEN type = 'invoice' THEN -amount
+                            WHEN type = 'credit' THEN amount
+                            ELSE 0
+                        END
+                    ) as balance
+                ")->value('balance') ?? 0
+                            )
+                            ->label('الرصيد الكلي')
+                            ->money('egp'),
+                    ]),
                 Tables\Columns\TextColumn::make('invoice.invoice_number')
                     ->label('سحب بالفاتورة')
-                    ->default('لايوجد')
-                    ->weight('semibold'),
+                    ->default('لايوجد'),
                 Tables\Columns\TextColumn::make('notes')
                     ->label('ملاحظات الحركة')
-                    ->limit(40)
-                    ->weight('semibold'),
+                    ->limit(40),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإضافة')
-                    ->date('d-m-Y')
-                    ->weight('semibold'),
+                    ->date('d-m-Y'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')

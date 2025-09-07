@@ -24,7 +24,6 @@ class CustomerResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-
     protected static ?string $modelLabel = 'عميل'; // Singular
 
     protected static ?string $pluralModelLabel = 'العملاء'; // Plural
@@ -130,10 +129,6 @@ class CustomerResource extends Resource
                         $state < 0 ? 'rose' : ($state > 0 ? 'success' : 'gray')
                     )
                     ->weight(FontWeight::Medium),
-                Tables\Columns\TextColumn::make('address')
-                    ->label('العنوان')
-                    ->weight(FontWeight::Medium)
-                    ->limit(20),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ التسجيل')
                     ->date("d-m-Y")

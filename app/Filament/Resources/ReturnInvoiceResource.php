@@ -102,7 +102,7 @@ class ReturnInvoiceResource extends Resource
                     ])
                     ->columns(4)
                     ->columnSpanFull()
-                    ->addActionLabel('إضافة صنف')
+                    ->addable(false)
             ]);
     }
 
