@@ -167,19 +167,26 @@ class InvoiceResource extends Resource
                 ->required()
                 ->rules(['required', 'string', 'max:255']),
             Forms\Components\Select::make('customer_id')
-                ->label('اسم العميل')
-                ->relationship(
-                    name: 'customer',
-                    titleAttribute: 'name',
-                    modifyQueryUsing: fn($query) => $query
-                        ->where('status', 'enabled')
-                        ->latest()
-                )
                 ->searchable()
                 ->native(false)
                 ->required()
-                ->preload(true, 10)
-                ->helperText('اختر العميل من القائمة أو ابدأ بالكتابة للبحث عن عميل موجود'),
+                ->preload(true)
+                ->label('اسم العميل')
+                ->searchable()
+                ->options(function () {
+                    // get 10 when open
+                    return Customer::where('status', 'enabled')->limit(10)->pluck('name', 'id')->toArray();
+                })
+                ->getOptionLabelUsing(fn($value) => Customer::find($value)?->name)
+                ->getSearchResultsUsing(function ($search) {
+                    return Customer::where('name', 'like', "%{$search}%")
+                        ->where('status', 'enabled')
+                        ->pluck('name', 'id')
+                        ->toArray();
+                })
+                ->placeholder('كل العملاء'),
+
+
             Forms\Components\Textarea::make('notes')
                 ->columnSpanFull(),
 
