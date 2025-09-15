@@ -83,9 +83,6 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('createdDate')
                     ->label('تاريخ الفاتورة')
                     ->color('primary'),
-                // Tables\Columns\TextColumn::make('createdTime')
-                //     ->label('وقت الفاتورة')
-                //     ->color('primary'),
                 Tables\Columns\TextColumn::make('has_returns')
                     ->label('هل بها مرتجع؟')
                     ->extraAttributes(['class' => 'text-sm'])
@@ -129,10 +126,17 @@ class InvoiceResource extends Resource
                     ->columnSpanFull(),
                 Tables\Filters\SelectFilter::make('customer_id')
                     ->label('اسم العميل')
-                    ->options(
-                        fn() => Customer::query()->pluck('name', 'id')->toArray()
-                    )
                     ->searchable()
+                    ->options(function () {
+                        // get 10 when open
+                        return Customer::limit(10)->pluck('name', 'id')->toArray();
+                    })
+                    ->getOptionLabelUsing(fn($value) => Customer::find($value)?->name)
+                    ->getSearchResultsUsing(function ($search) {
+                        return Customer::where('name', 'like', "%{$search}%")
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
                     ->placeholder('كل العملاء')
                     ->columnSpan(2),
             ], layout: FiltersLayout::AboveContent)

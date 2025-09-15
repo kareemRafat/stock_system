@@ -20,7 +20,7 @@ class Product extends Model
         'unit',
         'production_price',
         'type',
-        'suuplier_id',
+        'supplier_id',
     ];
 
     protected $casts = [
@@ -33,6 +33,11 @@ class Product extends Model
     public function purchases(): HasMany
     {
         return $this->hasMany(ProductPurchase::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
     /**

@@ -2,17 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Actions\ProductActions\AddStockAction;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Product;
+use App\Models\Supplier;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\ProductResource\Pages;
+use App\Filament\Actions\ProductActions\AddStockAction;
 
 class ProductResource extends Resource
 {
@@ -29,8 +31,6 @@ class ProductResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-bolt';
 
     protected static ?string $activeNavigationIcon = 'heroicon-s-bolt';
-
-
 
     public static function form(Form $form): Form
     {
@@ -84,6 +84,20 @@ class ProductResource extends Resource
                     ->rules('required')
                     ->numeric()
                     ->default(0),
+                Forms\Components\Select::make('supplier_id')
+                    ->label('المورد')
+                    ->helperText('يمكن عدم إختيار مورد فى حالة عدم وجود مورد')
+                    ->searchable()
+                    ->options(function () {
+                        // get 10 when open
+                        return Supplier::limit(10)->pluck('name', 'id')->toArray();
+                    })
+                    ->getOptionLabelUsing(fn($value) => Supplier::find($value)?->name)
+                    ->getSearchResultsUsing(function ($search) {
+                        return Supplier::where('name', 'like', "%{$search}%")
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    }),
                 Forms\Components\Textarea::make('description')
                     ->columnSpanFull()
                     ->label('وصف المنتج'),
@@ -142,8 +156,22 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: false),
             ])
             ->filters([
-                //
-            ])
+                Tables\Filters\SelectFilter::make('supplier_id')
+                    ->label('المورد')
+                    ->searchable()
+                    ->options(function () {
+                        // get 10 when open
+                        return Supplier::limit(10)->pluck('name', 'id')->toArray();
+                    })
+                    ->getOptionLabelUsing(fn($value) => Supplier::find($value)?->name)
+                    ->getSearchResultsUsing(function ($search) {
+                        return Supplier::where('name', 'like', "%{$search}%")
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->placeholder('كل الموردين')
+                    ->columnSpan(2),
+            ], layout: FiltersLayout::AboveContent)
             ->actions([
                 AddStockAction::make(),
                 Tables\Actions\EditAction::make(),

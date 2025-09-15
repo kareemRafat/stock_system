@@ -37,7 +37,6 @@ class SupplierInvoiceResource extends Resource
             ->schema([
                 Forms\Components\Select::make('supplier_id')
                     ->label('المورد')
-                    ->relationship('supplier', 'name')
                     ->options(
                         fn() => Supplier::query()
                             ->latest()
@@ -125,7 +124,7 @@ class SupplierInvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->recordUrl(null) // تعطيل الضغط على الصف
+            ->recordUrl(null)
             ->recordAction(null)
             ->defaultSort('created_at', 'desc')
             ->columns([
@@ -155,9 +154,21 @@ class SupplierInvoiceResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('supplier_id')
-                    ->label('اسم المورد')
-                    ->options(fn() => Supplier::query()->pluck('name', 'id')->toArray())
+                    ->label('المورد')
+                    ->options(
+                        fn() => Supplier::query()
+                            ->latest()
+                            ->limit(10)
+                            ->pluck('name', 'id')
+                    )
                     ->searchable()
+                    ->getSearchResultsUsing(
+                        fn(string $search) =>
+                        Supplier::query()
+                            ->where('name', 'like', "%{$search}%")
+                            ->limit(50)
+                            ->pluck('name', 'id')
+                    )
                     ->placeholder('كل الموردين')
                     ->columnSpan(2),
             ], layout: FiltersLayout::AboveContent)

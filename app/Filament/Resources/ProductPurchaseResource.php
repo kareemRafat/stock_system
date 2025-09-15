@@ -74,11 +74,11 @@ class ProductPurchaseResource extends Resource
                 Tables\Columns\TextColumn::make('total_cost')
                     ->label('التكلفة الإجمالية')
                     ->suffix(' ج.م ')
-                    ->sortable()
-                    ->summarize([
-                        Tables\Columns\Summarizers\Sum::make()
-                            ->money('EGP'),
-                    ]),
+                    ->sortable(),
+                    // ->summarize([
+                    //     Tables\Columns\Summarizers\Sum::make()
+                    //         ->money('EGP'),
+                    // ]),
 
                 Tables\Columns\TextColumn::make('purchase_date')
                     ->label('تاريخ الشراء')
@@ -95,7 +95,7 @@ class ProductPurchaseResource extends Resource
                     ->options(
                         fn() => Supplier::query()
                             ->latest()
-                            ->limit(20) // أول 20
+                            ->limit(15) // first 15
                             ->pluck('name', 'id')
                     )
                     ->searchable()
@@ -108,7 +108,8 @@ class ProductPurchaseResource extends Resource
                     ->getOptionLabelUsing(
                         fn($value): ?string => Supplier::find($value)?->name
                     )
-                    ->native(false),
+                    ->native(false)
+                    ->placeholder('اختر مورد'),
 
                 Tables\Filters\SelectFilter::make('product_id')
                     ->label('المنتج')
@@ -128,7 +129,8 @@ class ProductPurchaseResource extends Resource
                     ->getOptionLabelUsing(
                         fn($value): ?string => Product::find($value)?->name
                     )
-                    ->native(false),
+                    ->native(false)
+                    ->placeholder('اختر منتج'),
 
                 Tables\Filters\Filter::make('purchase_date')
                     ->form([

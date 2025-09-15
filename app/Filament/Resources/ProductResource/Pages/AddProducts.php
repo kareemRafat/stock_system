@@ -2,17 +2,19 @@
 
 namespace App\Filament\Resources\ProductResource\Pages;
 
-use App\Filament\Resources\ProductResource;
-use App\Models\Product;
 use Filament\Actions;
+use App\Models\Product;
+use App\Models\Supplier;
+use Filament\Resources\Pages\Page;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Notifications\Notification;
-use Filament\Resources\Pages\Page;
+use App\Filament\Resources\ProductResource;
+use Filament\Forms\Concerns\InteractsWithForms;
 
 class AddProducts extends Page
 {
@@ -66,9 +68,7 @@ class AddProducts extends Page
                                 ->required()
                                 ->inline(true),
                         ]),
-                    Grid::make(5)->schema([
-
-
+                    Grid::make(3)->schema([
                         TextInput::make('unit')
                             ->label('وحدة القياس')
                             ->required()
@@ -98,6 +98,20 @@ class AddProducts extends Page
                             ->required()
                             ->numeric()
                             ->default(0),
+
+                        Select::make('supplier_id')
+                            ->label('المورد')
+                            ->helperText('يمكن عدم إختيار مورد فى حالة عدم وجود مورد')
+                            ->searchable()
+                            ->options(function () {
+                                return Supplier::limit(10)->pluck('name', 'id')->toArray();
+                            })
+                            ->getOptionLabelUsing(fn($value) => Supplier::find($value)?->name)
+                            ->getSearchResultsUsing(function ($search) {
+                                return Supplier::where('name', 'like', "%{$search}%")
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            }),
 
                         TextInput::make('description')
                             ->label('الوصف')

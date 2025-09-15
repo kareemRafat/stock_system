@@ -40,7 +40,7 @@ class CreateSupplierInvoice extends CreateRecord
         foreach ($productIds as $productId) {
             $product = \App\Models\Product::find($productId);
             if ($product) {
-                $product->updateAverageCost(); // model function
+                $product->updateAverageCost(); // Product model function
             }
         }
 

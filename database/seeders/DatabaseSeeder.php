@@ -35,7 +35,10 @@ class DatabaseSeeder extends Seeder
             'role' => 'employee'
         ]);
 
-        User::factory(3)->create();
+        // supplier seeders
+        $this->call([
+            SupplierSeeder::class, // ✅ أضف السطر ده
+        ]);
 
         Product::factory(50)->create();
         Customer::factory(10)->create();
@@ -44,10 +47,5 @@ class DatabaseSeeder extends Seeder
         CustomerWallet::factory(20)->create();
 
         OutsourcedProduction::factory(20)->create();
-
-        // supplier seeders
-        $this->call([
-            SupplierSeeder::class, // ✅ أضف السطر ده
-        ]);
     }
 }
