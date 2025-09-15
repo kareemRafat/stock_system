@@ -29,7 +29,7 @@ class ProductFactory extends Factory
                 'بيض بلدي',
                 'عصير مانجو',
             ]),
-            'supplier'
+            'supplier' => 1 , 
             'description' => $this->faker->optional()->randomElement([
                 'منتج عالي الجودة ومناسب للاستخدام اليومي.',
                 'أفضل اختيار من حيث السعر والجودة.',
