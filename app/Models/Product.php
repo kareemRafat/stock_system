@@ -19,7 +19,8 @@ class Product extends Model
         'stock_quantity',
         'unit',
         'production_price',
-        'type'
+        'type',
+        'suuplier_id',
     ];
 
     protected $casts = [

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('price', 10, 2)->comment('سعر البيع');
             $table->unsignedTinyInteger('discount')->default(0);
             $table->integer('stock_quantity')->default(0);
+            $table->foreignId('supplier_id')->constrained()->onDelete('cascade')->comment('المورد');
             $table->string('unit')->nullable();
             // unit وحدة القياس (كرتونة - قطعة - كيلو إلخ)
             $table->timestamps();
